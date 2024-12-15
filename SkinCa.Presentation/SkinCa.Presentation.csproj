@@ -1,0 +1,41 @@
+<Project Sdk="Microsoft.NET.Sdk.Web">
+
+    <PropertyGroup>
+        <TargetFramework>net8.0</TargetFramework>
+        <Nullable>enable</Nullable>
+        <ImplicitUsings>enable</ImplicitUsings>
+    </PropertyGroup>
+
+    <ItemGroup>
+        <PackageReference Include="Microsoft.AspNetCore.OpenApi" Version="8.0.11"/>
+        <PackageReference Include="Swashbuckle.AspNetCore" Version="6.6.2"/>
+        <PackageReference Include="mICROSOFT.ASPNETCORE.AUTHENTICATION.FACEBOOK" Version="8.0.8" />
+        <PackageReference Include="mICROSOFT.ASPNETCORE.AUTHENTICATION.google" Version="8.0.8" />
+        <PackageReference Include="mICROSOFT.ASPNETCORE.AUTHENTICATION.JwtBearer" Version="8.0.8" />
+        <PackageReference Include="mICROSOFT.ASPNETCORE.Identity.entityframeworkcore" Version="8.0.8" />
+        <PackageReference Include="mICROSOFT.entityframeworkcore" Version="8.0.8" />
+        <PackageReference Include="mICROSOFT.entityframeworkcore.design" Version="8.0.8">
+            <PrivateAssets>all</PrivateAssets>
+            <IncludeAssets>runtime; build; native; contentfiles; analyzers; buildtransitive</IncludeAssets>
+        </PackageReference>
+        <PackageReference Include="mICROSOFT.entityframeworkcore.sqlserver" Version="8.0.8" />
+        <PackageReference Include="mICROSOFT.entityframeworkcore.toolS" Version="8.0.8">
+            <PrivateAssets>all</PrivateAssets>
+            <IncludeAssets>runtime; build; native; contentfiles; analyzers; buildtransitive</IncludeAssets>
+        </PackageReference>
+        <PackageReference Include="Microsoft.VisualStudio.Web.CodeGeneration.Design" Version="8.0.5" />
+        <PackageReference Include="Nlog.web.aspnetcore" Version="5.3.14" />
+        <PackageReference Include="system.identitymodel.tokens.jwt" Version="8.1.1" />
+
+    </ItemGroup>
+
+    <ItemGroup>
+      <Folder Include="Controllers\" />
+    </ItemGroup>
+
+    <ItemGroup>
+      <ProjectReference Include="..\SkinCa.Business\SkinCa.Business.csproj" />
+      <ProjectReference Include="..\SkinCa.Common\SkinCa.Common.csproj" />
+    </ItemGroup>
+
+</Project>

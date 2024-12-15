@@ -1,0 +1,34 @@
+﻿
+Microsoft Visual Studio Solution File, Format Version 12.00
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "SkinCa.Presentation", "SkinCa.Presentation\SkinCa.Presentation.csproj", "{D46A9180-A1A3-4E38-A6B4-F4F275EFF6C3}"
+EndProject
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "SkinCa.Business", "SkinCa.Business\SkinCa.Business.csproj", "{870E1B87-EEE0-426A-B4AF-A0E0C9E9F85D}"
+EndProject
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "SkinCa.Common", "SkinCa.Common\SkinCa.Common.csproj", "{7882B5A2-1C2F-4215-8DEA-DAEB096113A8}"
+EndProject
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "SkinCa.DataAccess", "SkinCa.DataAccess\SkinCa.DataAccess.csproj", "{FB57250C-B633-415F-BAC4-F6040D417410}"
+EndProject
+Global
+	GlobalSection(SolutionConfigurationPlatforms) = preSolution
+		Debug|Any CPU = Debug|Any CPU
+		Release|Any CPU = Release|Any CPU
+	EndGlobalSection
+	GlobalSection(ProjectConfigurationPlatforms) = postSolution
+		{D46A9180-A1A3-4E38-A6B4-F4F275EFF6C3}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{D46A9180-A1A3-4E38-A6B4-F4F275EFF6C3}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{D46A9180-A1A3-4E38-A6B4-F4F275EFF6C3}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{D46A9180-A1A3-4E38-A6B4-F4F275EFF6C3}.Release|Any CPU.Build.0 = Release|Any CPU
+		{870E1B87-EEE0-426A-B4AF-A0E0C9E9F85D}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{870E1B87-EEE0-426A-B4AF-A0E0C9E9F85D}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{870E1B87-EEE0-426A-B4AF-A0E0C9E9F85D}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{870E1B87-EEE0-426A-B4AF-A0E0C9E9F85D}.Release|Any CPU.Build.0 = Release|Any CPU
+		{7882B5A2-1C2F-4215-8DEA-DAEB096113A8}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{7882B5A2-1C2F-4215-8DEA-DAEB096113A8}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{7882B5A2-1C2F-4215-8DEA-DAEB096113A8}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{7882B5A2-1C2F-4215-8DEA-DAEB096113A8}.Release|Any CPU.Build.0 = Release|Any CPU
+		{FB57250C-B633-415F-BAC4-F6040D417410}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{FB57250C-B633-415F-BAC4-F6040D417410}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{FB57250C-B633-415F-BAC4-F6040D417410}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{FB57250C-B633-415F-BAC4-F6040D417410}.Release|Any CPU.Build.0 = Release|Any CPU
+	EndGlobalSection
+EndGlobal
