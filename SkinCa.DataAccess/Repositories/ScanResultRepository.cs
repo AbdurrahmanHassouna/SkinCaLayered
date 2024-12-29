@@ -1,26 +1,37 @@
-﻿using SkinCa.DataAccess.RepoContracts;
+﻿using Microsoft.EntityFrameworkCore;
+using SkinCa.DataAccess.RepositoriesContracts;
 
 namespace SkinCa.DataAccess.Repositories;
 
 public class ScanResultRepository:IScanResultRepository
 {
-    public Task<ScanResult> GetScanResultAsync(int id)
+    private readonly AppDbContext _context;
+
+    public ScanResultRepository(AppDbContext context)
     {
-        throw new NotImplementedException();
+        _context = context;
     }
 
-    public Task<List<ScanResult>> GetScanResultsAsync()
+    public async Task<ScanResult?> GetByIdAsync(int id)
     {
-        throw new NotImplementedException();
+        return await _context.ScanResults.FindAsync(id);
     }
-
-    public Task AddScanResultAsync(ScanResult scanResult)
+    public async Task<List<ScanResult>> GetAllAsync()
     {
-        throw new NotImplementedException();
+        return await _context.ScanResults.ToListAsync();
     }
-
-    public Task DeleteScanResultAsync(int id)
+    public async Task<bool> CreateAsync(ScanResult scanResult)
     {
-        throw new NotImplementedException();
+        await _context.ScanResults.AddAsync(scanResult);
+        return await _context.SaveChangesAsync() > 0;
+       
+    }
+    public async Task<bool?> DeleteAsync(int id)
+    {
+        var scanResult = await _context.ScanResults.FindAsync(id);
+        if (scanResult == null) return null;
+        _context.ScanResults.Remove(scanResult);
+        return await _context.SaveChangesAsync() > 0;
+
     }
 }

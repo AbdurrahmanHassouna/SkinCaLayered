@@ -1,31 +1,49 @@
-﻿using SkinCa.DataAccess.RepoContracts;
+﻿using Microsoft.EntityFrameworkCore;
+using SkinCa.DataAccess.RepositoriesContracts;
 
 namespace SkinCa.DataAccess.Repositories;
 
-public class ChatRepository: IChatRepository    
-{
-    public Task CreateAsync(Chat chat)
+public class ChatRepository : IChatRepository
     {
-        throw new NotImplementedException();
-    }
+        private readonly AppDbContext _context;
 
-    public Task DeleteAsync(Chat chat)
-    {
-        throw new NotImplementedException();
-    }
+        public ChatRepository(AppDbContext context)
+        {
+            _context = context;
+        }
 
-    public Task<List<Chat>> GetAllByUserIdAsync(string userId)
-    {
-        throw new NotImplementedException();
-    }
+        public async Task<bool>  CreateAsync(Chat chat)
+        {
+            await _context.Chats.AddAsync(chat);
+            return await _context.SaveChangesAsync() > 0;
+        }
 
-    public Task<Chat> GetByIdAsync(string userId)
-    {
-        throw new NotImplementedException();
-    }
+        public async Task<bool?>  DeleteAsync(int id)
+        {
+            var chat = await _context.Chats.FindAsync(id);
+            if (chat == null) return null;
+            _context.Chats.Remove(chat);
+            return await _context.SaveChangesAsync() > 0;
+        }
 
-    public Task DelesteMessagesAsync(int chatId)
-    {
-        throw new NotImplementedException();
+        public async Task<List<Chat>> GetAllByUserIdAsync(string userId)
+        {
+            return await _context.Chats.Where(c => c.Users.Any(a=>a.Id==userId)).ToListAsync();
+        }
+
+        public async Task<Chat?> GetByIdAsync(int chatId)
+        {
+            return await _context.Chats
+                .Include(c => c.Users)
+                .Include(c => c.Messages)
+                .FirstOrDefaultAsync(c => c.Id == chatId);
+        }
+
+        public async Task<bool?>  DeleteMessagesAsync(int chatId)
+        {
+            var chat = await _context.Chats.Include(c=>c.Messages).FirstOrDefaultAsync(c => c.Id == chatId);
+            if (chat == null) return null;
+            _context.Messages.RemoveRange(chat.Messages);
+            return await _context.SaveChangesAsync() > 0;
+        }
     }
-}

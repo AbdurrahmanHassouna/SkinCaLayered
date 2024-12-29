@@ -1,26 +1,56 @@
-﻿using SkinCa.DataAccess.RepoContracts;
+﻿using Microsoft.EntityFrameworkCore;
+using SkinCa.DataAccess.RepositoriesContracts;
 
 namespace SkinCa.DataAccess.Repositories;
 
 public class DiseaseRepository:IDiseaseRepository
 {
-    public Task<List<Disease>> GetAllAsyncAsync()
+    private readonly AppDbContext _context;
+
+    public DiseaseRepository(AppDbContext context)
     {
-        throw new NotImplementedException();
+        _context = context;
     }
 
-    public Task<Disease> EditAsync(Disease disease)
+    public async Task<List<Disease>> GetAllAsyncAsync()
     {
-        throw new NotImplementedException();
+        return await _context.Diseases.ToListAsync();
     }
 
-    public Task<List<Disease>> SearchAsync(string searchString)
+    public async Task<bool?> EditAsync(Disease disease)
     {
-        throw new NotImplementedException();
+        var existingDisease =await _context.Diseases.FindAsync(disease.Id);
+        if(existingDisease==null) return null;
+        existingDisease.Title=disease.Title;
+        existingDisease.Causes=disease.Causes;
+        existingDisease.Image = disease.Image;
+        existingDisease.Prevention =disease.Prevention;
+        existingDisease.Specialty = disease.Specialty;
+        existingDisease.Symptoms = disease.Symptoms;
+        existingDisease.Types = disease.Types;
+        existingDisease.DiagnosticMethods = disease.DiagnosticMethods;
+        
+        _context.Diseases.Update(existingDisease);
+        
+        return await _context.SaveChangesAsync() > 0;
     }
 
-    public Task CreateAsync(Disease disease)
+    public async Task<List<Disease>> SearchAsync(string searchString)
     {
-        throw new NotImplementedException();
+        return await _context.Diseases.Where(d => d.Title.Contains(searchString)).ToListAsync();
+    }
+
+    public async Task<bool> CreateAsync(Disease disease)
+    {
+        await _context.Diseases.AddAsync(disease);
+        return await _context.SaveChangesAsync() > 0;
+    }
+
+    public async Task<bool?> DeleteAsync(int id)
+    {
+        var disease = await _context.Diseases.FindAsync(id);
+        if (disease == null) return null;
+        _context.Diseases.Remove(disease);
+        return await _context.SaveChangesAsync() > 0;
     }
 }
