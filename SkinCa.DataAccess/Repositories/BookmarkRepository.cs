@@ -1,21 +1,35 @@
-﻿using SkinCa.DataAccess.RepoContracts;
+﻿using Microsoft.EntityFrameworkCore;
+using SkinCa.DataAccess.RepositoriesContracts;
 
 namespace SkinCa.DataAccess.Repositories;
 
-public class BookmarkRepository:IBookmarkRepository
+public class BookmarkRepository : IBookmarkRepository
 {
-    public Task<List<BookMark>> GetAllBookMarksByUserIdAsync(string userId)
+    private readonly AppDbContext _context;
+
+    public BookmarkRepository(AppDbContext context)
     {
-        throw new NotImplementedException();
+        _context = context;
     }
 
-    public Task<BookMark> CreateAsync(BookMark bookMark)
+    public async Task<List<BookMark>> GetAllByUserIdAsync(string userId)
     {
-        throw new NotImplementedException();
+        return await _context.BookMarks.Where(b => b.UserId == userId).ToListAsync();
     }
 
-    public Task DeleteAsync(BookMark bookMark)
+    public async Task<BookMark> CreateAsync(BookMark bookMark)
     {
-        throw new NotImplementedException();
+        await _context.BookMarks.AddAsync(bookMark);
+        await _context.SaveChangesAsync();
+        return bookMark;
+    }
+
+    public async Task<bool?> DeleteAsync(int id)
+    {
+        var bookMark = await _context.BookMarks.FindAsync(id);
+        if (bookMark == null) return null;
+        _context.BookMarks.Remove(bookMark);
+        return await _context.SaveChangesAsync() > 0;
+
     }
 }
