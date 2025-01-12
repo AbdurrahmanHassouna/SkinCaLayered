@@ -17,7 +17,7 @@ namespace SkinCa.DataAccess
 
         }
 
-        public DbSet<BookMark> BookMarks { get; set; }
+        public DbSet<Bookmark> Bookmarks { get; set; }
         public DbSet<Chat> Chats { get; set; }
         public DbSet<Message> Messages { get; set; }
         public DbSet<Disease> Diseases { get; set; }
@@ -36,19 +36,18 @@ namespace SkinCa.DataAccess
              .HasForeignKey(d => d.UserId)
              .OnDelete(DeleteBehavior.Restrict);
 
-            builder.Entity<BookMark>()
+            builder.Entity<Bookmark>()
                 .HasOne(b => b.Disease)
                 .WithMany()
                 .HasForeignKey(b => b.DiseaseId)
                 .OnDelete(DeleteBehavior.Cascade);
 
-            builder.Entity<BookMark>()
+            builder.Entity<Bookmark>()
                 .HasOne(b => b.User)
-                .WithMany(u => u.BookMarks)
+                .WithMany(u => u.Bookmarks)
                 .HasForeignKey(b => b.UserId)
                 .OnDelete(DeleteBehavior.Restrict);
             
-            // Configure many-to-many relationships
             builder.Entity<Chat>()
                 .HasMany(c => c.Users)
                 .WithMany(u => u.Chats)

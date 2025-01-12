@@ -9,7 +9,6 @@ namespace SkinCa.DataAccess
         public virtual ApplicationUser User { get; set; }
         public int Experience {  get; set; }
         public string Description { get; set; }
-        
         [DataType(DataType.Currency)]
         public decimal ClinicFees {  get; set; }
         public string Services {  get; set; }

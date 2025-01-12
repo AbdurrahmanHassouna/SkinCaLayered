@@ -4,6 +4,7 @@ namespace SkinCa.DataAccess
 {
     public class DoctorWorkingDay:Entity<int>
     {
+        [Key]
         public int DoctorInfoId { get; set; }
         public DoctorInfo DoctorInfo { get; set; }
         public TimeSpan OpenAt { get; set; }

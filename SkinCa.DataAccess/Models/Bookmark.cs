@@ -2,7 +2,7 @@
 
 namespace SkinCa.DataAccess
 {
-    public class BookMark:Entity<int>
+    public class Bookmark:Entity<int>
     {
         public int DiseaseId {  get; set; }
         public Disease Disease { get; set; }

@@ -12,7 +12,7 @@ public class BannerRepository:IBannerRepository
         _context = context;
     }
 
-    public async Task<Banner?> GetBannerAsync(int bannerId)
+    public async Task<Banner?> GetBannerByIdAsync(int bannerId)
     {
         return await _context.Banners.FindAsync(bannerId);
     }

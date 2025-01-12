@@ -12,6 +12,10 @@ public class DiseaseRepository:IDiseaseRepository
         _context = context;
     }
 
+    public async Task<Disease?> GetById(int id)
+    {
+        return await _context.Diseases.FindAsync(id);
+    }
     public async Task<List<Disease>> GetAllAsyncAsync()
     {
         return await _context.Diseases.ToListAsync();

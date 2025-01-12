@@ -41,14 +41,18 @@ public class BannerService : IBannerService
         await bannerRequestDto.File.CopyToAsync(memoryStream);
         banner.Image = memoryStream.ToArray();
         var result = await _bannerRepository.UpdateAsync(banner);
-        if (result == true)
-            return new BannerResponseDto()
+        return result switch
+        {
+            true => new BannerResponseDto()
             {
-                Description = bannerRequestDto.Description, Id = bannerRequestDto.Id, Title = bannerRequestDto.Title,
+                Description = bannerRequestDto.Description,
+                Id = banner.Id,
+                Title = bannerRequestDto.Title,
                 Image = banner.Image
-            };
-        if (result == false) throw new Exception("Couldn't update banner");
-        return null;
+            },
+            false => throw new Exception("Couldn't update banner"),
+            _ => null
+        };
     }
 
     public async Task<bool?> DeleteAsync(int id)

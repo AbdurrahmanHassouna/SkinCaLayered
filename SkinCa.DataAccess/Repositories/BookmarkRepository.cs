@@ -12,23 +12,25 @@ public class BookmarkRepository : IBookmarkRepository
         _context = context;
     }
 
-    public async Task<List<BookMark>> GetAllByUserIdAsync(string userId)
+    public async Task<List<Bookmark>> GetAllByUserIdAsync(string userId)
     {
-        return await _context.BookMarks.Where(b => b.UserId == userId).ToListAsync();
+        return await _context.Bookmarks.Where(b => b.UserId == userId).Include(b=>b.Disease).ToListAsync();
     }
 
-    public async Task<BookMark> CreateAsync(BookMark bookMark)
+    public async Task<bool?> CreateAsync(Bookmark bookmark)
     {
-        await _context.BookMarks.AddAsync(bookMark);
-        await _context.SaveChangesAsync();
-        return bookMark;
+        await _context.Bookmarks.AddAsync(bookmark);
+        
+       
+        
+        return await _context.SaveChangesAsync() >0;
     }
 
     public async Task<bool?> DeleteAsync(int id)
     {
-        var bookMark = await _context.BookMarks.FindAsync(id);
-        if (bookMark == null) return null;
-        _context.BookMarks.Remove(bookMark);
+        var bookmark = await _context.Bookmarks.FindAsync(id);
+        if (bookmark == null) return null;
+        _context.Bookmarks.Remove(bookmark);
         return await _context.SaveChangesAsync() > 0;
 
     }

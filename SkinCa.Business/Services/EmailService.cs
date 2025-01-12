@@ -34,8 +34,7 @@ namespace SkinCa.Business.Services
             };
             await stmpClient.SendMailAsync(mail);
         }
-        
-        public async Task SendEmailConfirmation(string email,string token)
+        public async Task SendConfirmationEmail(string email,string token)
         {
           
             string message = $@"

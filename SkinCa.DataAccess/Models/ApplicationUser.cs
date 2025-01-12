@@ -16,7 +16,7 @@ namespace SkinCa.DataAccess
         public double? Longitude { get; set; }
         public string? Address { get; set; }
         public byte[]? ProfilePicture { get; set; }
-        public List<BookMark> BookMarks { get; set; }
+        public List<Bookmark> Bookmarks { get; set; }
         public List<Disease> Diseases { get; set; }
         public List<ScanResult> ModelResults { get; set; }
         public List<Banner> Banners { get; set; }
