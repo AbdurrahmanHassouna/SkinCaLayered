@@ -47,7 +47,7 @@ namespace SkinCa.Business.Services
                 PhoneNumber = model.PhoneNumber.Trim(),
                 FirstName = model.FirstName.Trim(),
                 LastName = model.LastName.Trim(),
-                BirthDate =(model.BirthDate != DateTime.MinValue)?model.BirthDate : null,
+                BirthDate =model.BirthDate,
                 Address = model.Address?.Trim(),
                 Governorate = (short)model.Governorate,
                 Latitude=model.Latitude,
@@ -124,27 +124,68 @@ namespace SkinCa.Business.Services
                 Token = new JwtSecurityTokenHandler().WriteToken(jwtSecurityToken)
             };
         }
-        public async Task<string?> GetUserIdAsync(string header)
+        public async Task<bool?> RequestEmailConfirmationAsync(string email)
         {
-            string token;
-            if (header.StartsWith("Bearer "))
-            {
-                token = header.Substring("Bearer ".Length);
-            }
-            else return null;
-            var result = await new JwtSecurityTokenHandler().ValidateTokenAsync(token, new TokenValidationParameters
-            {
-                ValidAudience = _jwt.Audience,
-                ValidIssuer = _jwt.Issuer,
-                IssuerSigningKey = new SymmetricSecurityKey(Encoding.UTF8.GetBytes(_jwt.Key))
-            });
-            return !result.IsValid ? null : result.Claims["userid"].ToString();
+            var user = await _userManager.FindByEmailAsync(email);
+            if (user == null) return null;
+            var token = await _userManager.GenerateEmailConfirmationTokenAsync(user);
+            await _emailService.SendConfirmationEmail(email, token);
+            return true;
+        } 
+        public async Task<bool?> ConfirmEmailAsync(string email, string token)
+        {
+            var user = await _userManager.FindByEmailAsync(email);
+            if (user == null) return null;
+            var result = await _userManager.ConfirmEmailAsync(user, token);
+            return result.Succeeded;
         }
-        public async Task<bool> VerifyResetPasswordToken(string token, ApplicationUser user)
+        public async Task<ApplicationUser?> GetUserAsync(ClaimsPrincipal userPrincipal)
         {
+            return await _userManager.GetUserAsync(userPrincipal);
+        }
+        public async Task<bool?> ChangePasswordAsync(ClaimsPrincipal userPrincipal, string oldPassword, string newPassword)
+        {
+            var user = await _userManager.GetUserAsync(userPrincipal);
+
+            if (user == null) return null;
+            var result = await _userManager.ChangePasswordAsync(user, oldPassword, newPassword);
+            
+            return result.Succeeded;
+        }
+
+        public async Task<bool?> DeleteAccountAsync(ClaimsPrincipal userPrincipal)
+        {
+            var user = await _userManager.GetUserAsync(userPrincipal);
+            if (user == null) return null;
+            var result = await _userManager.DeleteAsync(user);
+            return result.Succeeded;
+        }
+
+        public async Task<bool?> ForgotPasswordAsync(string email)
+        {
+            var user = await _userManager.FindByEmailAsync(email);
+            if (user == null) return null;
+
+            var token = await _userManager.GeneratePasswordResetTokenAsync(user);
+            
+            await _emailService.SendForgotPasswordEmail(user.Email,token);
+            
+            return true;
+        }
+        public async Task<bool?> VerifyResetPasswordToken(string token,string email)
+        {
+            var user = await _userManager.FindByEmailAsync(email);
+            if (user == null) return null;
             var result = await _userManager.VerifyUserTokenAsync(user,
                  _options.Tokens.PasswordResetTokenProvider, ResetPasswordTokenPurpose, token);
             return result;
+        }
+        public async Task<bool?> ResetPassword(string token, string email, string newPassword)
+        {
+            var user = await _userManager.FindByEmailAsync(email);
+            if (user == null) return null;
+            var result = await _userManager.ResetPasswordAsync(user, token, newPassword);
+            return result.Succeeded;
         }
         private async Task<JwtSecurityToken> CreateJwtToken(ApplicationUser user)
         {

@@ -32,7 +32,19 @@ namespace SkinCa.Business.Services
                 IsBodyHtml = true,
                 Body = message
             };
-            await stmpClient.SendMailAsync(mail);
+            try
+            {
+                await stmpClient.SendMailAsync(mail);
+            }
+            catch (Exception ex)
+            {
+                Console.WriteLine(ex.Message);
+            }
+            finally
+            {
+                stmpClient.Dispose();
+            }
+            
         }
         public async Task SendConfirmationEmail(string email,string token)
         {
@@ -173,7 +185,6 @@ namespace SkinCa.Business.Services
                 email,
                 "Reset Password",
                 message);
-            Console.WriteLine($"reset password code : {token}");
         }
     }
 }

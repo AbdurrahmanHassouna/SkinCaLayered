@@ -30,10 +30,6 @@
     </ItemGroup>
 
     <ItemGroup>
-      <Folder Include="Controllers\" />
-    </ItemGroup>
-
-    <ItemGroup>
       <ProjectReference Include="..\SkinCa.Business\SkinCa.Business.csproj" />
       <ProjectReference Include="..\SkinCa.Common\SkinCa.Common.csproj" />
     </ItemGroup>

@@ -1,8 +1,11 @@
 ﻿using GeoCoordinatePortable;
+using Microsoft.AspNetCore.Identity;
+using SkinCa.Business.DTOs;
 using SkinCa.Business.DTOs.DoctorInfo;
 using SkinCa.Business.DTOs.WorkingDay;
 using SkinCa.Business.ServicesContracts;
 using SkinCa.Common;
+using SkinCa.DataAccess;
 using SkinCa.DataAccess.RepositoriesContracts;
 
 namespace SkinCa.Business.Services;
@@ -10,9 +13,11 @@ namespace SkinCa.Business.Services;
 public class DoctorInfoService: IDoctorInfoService
 {
     private IDoctorInfoRepository _doctorInfoRepository;
-    DoctorInfoService(IDoctorInfoRepository doctorInfoRepository)
+    private UserManager<ApplicationUser> _userManager;
+    DoctorInfoService(IDoctorInfoRepository doctorInfoRepository, UserManager<ApplicationUser> userManager)
     {
         _doctorInfoRepository= doctorInfoRepository;
+        _userManager = userManager;
     }
     public async Task<IList<DoctorSummaryDto>> GetDoctorsInfoAsync()
     {
@@ -85,18 +90,93 @@ public class DoctorInfoService: IDoctorInfoService
         }).ToList();
     }
 
-    public Task<bool> CreateDoctorInfoAsync(DoctorInfoRequestDto doctorInfoDto)
+    public async Task<bool> CreateDoctorInfoAsync(DoctorInfoRequestDto doctorInfoDto)
     {
-        throw new NotImplementedException();
+        var model = (RegistrationRequestDto)doctorInfoDto;
+        if (await _userManager.FindByEmailAsync(model.Email) is not null)
+        {
+            return false;
+        }
+
+        var user = new ApplicationUser
+        {
+            UserName = model.Email.Trim(),
+            Email = model.Email.Trim(),
+            PhoneNumber = model.PhoneNumber.Trim(),
+            FirstName = model.FirstName.Trim(),
+            LastName = model.LastName.Trim(),
+            BirthDate =model.BirthDate,
+            Address = model.Address?.Trim(),
+            Governorate = (short)model.Governorate,
+            Latitude=model.Latitude,
+            Longitude=model.Longitude
+        };
+        if (model.ProfilePicture != null)
+        {
+            using(var memoryStream = new MemoryStream())
+            {
+                await model.ProfilePicture.CopyToAsync(memoryStream);
+                user.ProfilePicture = memoryStream.ToArray();
+            }
+        }
+        var result = await _userManager.CreateAsync(user, model.Password.Trim());
+        if (!result.Succeeded)
+        {
+            return false;
+        }
+
+        var doctorInfo = new DoctorInfo()
+        {
+            UserId = user.Id,
+            ClinicFees = doctorInfoDto.ClinicFees,
+            Description = doctorInfoDto.Description,
+            WorkingDays = doctorInfoDto.WorkingDays.Select(w => new DoctorWorkingDay()
+            {
+                Day = w.Day,
+                CloseAt = w.CloseAt,
+                OpenAt = w.OpenAt
+            }).ToList(),
+            Experience = doctorInfoDto.Experience,
+            Specialization = doctorInfoDto.Specialization,
+            Services = string.Join(",", doctorInfoDto.Services)
+        };
+         return await _doctorInfoRepository.CreateAsync(doctorInfo);
     }
 
-    public Task<bool> UpdateDoctorInfoAsync(string id ,DoctorInfoRequestDto doctorInfoRequestDto)
+    public async Task<bool?> UpdateDoctorInfoAsync(string userId,DoctorInfoRequestDto doctorInfoRequestDto)
     {
-        throw new NotImplementedException();
+        var doctorInfo = await _doctorInfoRepository.GetDoctorInfoAsync(userId);
+        if (doctorInfo == null) return null;
+        doctorInfo.ClinicFees = doctorInfoRequestDto.ClinicFees;
+        doctorInfo.Description = doctorInfoRequestDto.Description;
+        doctorInfo.WorkingDays = doctorInfoRequestDto.WorkingDays.Select(w=> new DoctorWorkingDay()
+        {
+            Day = w.Day,
+            OpenAt = w.OpenAt,
+            CloseAt = w.CloseAt
+        }).ToList();
+        doctorInfo.Experience = doctorInfoRequestDto.Experience;
+        doctorInfo.Specialization = doctorInfoRequestDto.Specialization;
+        doctorInfo.Services = string.Join(",", doctorInfoRequestDto.Services);
+        var succeeded = await _doctorInfoRepository.UpdateAsync(doctorInfo);
+        if(succeeded != true) return succeeded;
+        var model = (RegistrationRequestDto)doctorInfoRequestDto;
+        doctorInfo.User.UserName = model.Email.Trim();
+        doctorInfo.User.Email = model.Email.Trim();
+        doctorInfo.User.PhoneNumber = model.PhoneNumber.Trim();
+        doctorInfo.User.FirstName = model.FirstName.Trim();
+        doctorInfo.User.LastName = model.LastName.Trim();
+        doctorInfo.User.BirthDate = model.BirthDate;
+        doctorInfo.User.Address = model.Address?.Trim();
+        doctorInfo.User.Governorate = (short)model.Governorate;
+        doctorInfo.User.Latitude = model.Latitude;
+        doctorInfo.User.Longitude = model.Longitude;
+        var result = await _userManager.UpdateAsync(doctorInfo.User);
+        return result.Succeeded;
     }
 
-    public Task<bool> DeleteDoctorInfoAsync(Guid id)
+    public async Task<bool?> DeleteDoctorInfoAsync(string userId)
     {
-        throw new NotImplementedException();
+        return await _doctorInfoRepository.DeleteAsync(userId);
     }
 }

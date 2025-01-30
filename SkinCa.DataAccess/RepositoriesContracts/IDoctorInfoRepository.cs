@@ -6,7 +6,7 @@ public interface IDoctorInfoRepository
     Task<DoctorInfo?> GetDoctorInfoAsync(string doctorId);
     Task<List<DoctorInfo>> GetWorkingDoctorsAsync();
     Task<bool> CreateAsync(DoctorInfo doctor);
-    Task<bool?>  DeleteAsync(int id);
+    Task<bool?>  DeleteAsync(string id);
     Task<bool?> UpdateAsync(DoctorInfo doctor);
     bool IsWorkingNow(DoctorWorkingDay doctorWorkingDay);
 }

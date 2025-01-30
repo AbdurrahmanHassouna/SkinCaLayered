@@ -3,8 +3,9 @@ using System.ComponentModel.DataAnnotations.Schema;
 
 namespace SkinCa.DataAccess
 {
-    public class DoctorInfo:Entity<int>
+    public class DoctorInfo
     {
+        [Key]
         public string UserId { get; set; }
         public virtual ApplicationUser User { get; set; }
         public int Experience {  get; set; }
@@ -14,5 +15,7 @@ namespace SkinCa.DataAccess
         public string Services {  get; set; }
         public string Specialization { get; set; }
         public virtual ICollection<DoctorWorkingDay> WorkingDays { get; set; }
+        DateTime Created{ get; set; }
+        DateTime LastModified{ get; set; }
     }
 }

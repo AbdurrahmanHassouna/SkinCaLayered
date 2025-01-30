@@ -43,9 +43,9 @@ public class DoctorInfoRepository:IDoctorInfoRepository
         return await _context.SaveChangesAsync() > 0;
     }
 
-    public async Task<bool?> DeleteAsync(int id)
+    public async Task<bool?> DeleteAsync(string userId)
     {
-        var doctorInfo = await _context.DoctorInfos.FindAsync(id);
+        var doctorInfo = await _context.DoctorInfos.FindAsync(userId);
         if (doctorInfo == null) return null;
         _context.DoctorInfos.Remove(doctorInfo);
         return await _context.SaveChangesAsync() > 0;
@@ -53,7 +53,7 @@ public class DoctorInfoRepository:IDoctorInfoRepository
 
     public async Task<bool?> UpdateAsync(DoctorInfo doctor)
     {
-        var existing =await _context.DoctorInfos.FindAsync(doctor.Id);
+        var existing =await _context.DoctorInfos.FindAsync(doctor.UserId);
         
         if(existing==null) return null;
         
@@ -63,14 +63,6 @@ public class DoctorInfoRepository:IDoctorInfoRepository
         existing.Services =    doctor.Services;
         existing.ClinicFees =  doctor.ClinicFees;
         existing.Specialization = doctor.Specialization;
-        existing.User.Latitude = doctor.User.Latitude;
-        existing.User.Longitude = doctor.User.Longitude;
-        existing.User.Governorate = doctor.User.Governorate;
-        existing.User.ProfilePicture= doctor.User.ProfilePicture;
-        existing.User.FirstName = doctor.User.FirstName;
-        existing.User.LastName = doctor.User.LastName;
-        existing.User.BirthDate = doctor.User.BirthDate;
-        existing.User.Address = doctor.User.Address;
         
         _context.DoctorInfos.Update(existing);
         

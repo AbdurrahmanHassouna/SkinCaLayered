@@ -10,12 +10,12 @@ namespace SkinCa.DataAccess
     {
         [MaxLength(50)] public string FirstName { get; set; }
         [MaxLength(100)] public string LastName { get; set; }
-        public DateTime? BirthDate { get; set; }
+        public DateTime BirthDate { get; set; }
         public short Governorate { get; set; }
         public double? Latitude { get; set; }
         public double? Longitude { get; set; }
         public string? Address { get; set; }
-        public byte[]? ProfilePicture { get; set; }
+        public byte[] ProfilePicture { get; set; }
         public List<Bookmark> Bookmarks { get; set; }
         public List<Disease> Diseases { get; set; }
         public List<ScanResult> ModelResults { get; set; }
