@@ -13,9 +13,9 @@ public class DiseaseService : IDiseaseService
     {
         _diseaseRepository = diseaseRepository;
     }
-    public async Task<DiseaseResponseDto?> GetById( int diseaseId)
+    public async Task<DiseaseResponseDto?> GetByIdAstbc( int diseaseId)
     {
-        var disease = await _diseaseRepository.GetById(diseaseId);
+        var disease = await _diseaseRepository.GetByIdAsync(diseaseId);
         if (disease == null) return null;
         var diseaseResponseDto = new DiseaseResponseDto()
         {
@@ -35,7 +35,7 @@ public class DiseaseService : IDiseaseService
 
     public async Task<List<DiseaseResponseDto>> GetAllAsync()
     {
-        var diseases = await _diseaseRepository.GetAllAsyncAsync();
+        var diseases = await _diseaseRepository.GetAllAsync();
         return diseases.Select(disease => new DiseaseResponseDto
         {
             Id = disease.Id,
@@ -71,7 +71,7 @@ public class DiseaseService : IDiseaseService
         return await _diseaseRepository.CreateAsync(disease);
     }
 
-    public async Task<bool?> EditAsync(int id,DiseaseRequestDto diseaseRequestDto)
+    public async Task<bool> EditAsync(int id,DiseaseRequestDto diseaseRequestDto)
     {
         var disease = new Disease
         {
@@ -110,7 +110,7 @@ public class DiseaseService : IDiseaseService
         }).ToList();
     }
 
-    public async Task<bool?> DeleteAsync(int id)
+    public async Task<bool> DeleteAsync(int id)
     {
         return await _diseaseRepository.DeleteAsync(id);
     }

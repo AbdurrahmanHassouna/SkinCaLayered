@@ -16,7 +16,7 @@ namespace SkinCa.Business.Services
             network = options.Value;
         }
 
-        private async Task SendEmailAsync(string email, string subject, string message)
+        private async Task<bool> SendEmailAsync(string email, string subject, string message)
         {
             var stmpClient = new SmtpClient("smtp-mail.outlook.com", 587)
             {
@@ -24,9 +24,10 @@ namespace SkinCa.Business.Services
                 UseDefaultCredentials = false,
                 Credentials = new NetworkCredential(network.Email, network.Password),
             };
+            var senderEmail = network.Email.Trim();
             MailMessage mail = new MailMessage
             {
-                From = new MailAddress(network.Email),
+                From = new MailAddress(senderEmail, "SkinCa Email"),
                 To = { new MailAddress(email) },
                 Subject = subject,
                 IsBodyHtml = true,
@@ -39,16 +40,17 @@ namespace SkinCa.Business.Services
             catch (Exception ex)
             {
                 Console.WriteLine(ex.Message);
+                return false;
             }
             finally
             {
                 stmpClient.Dispose();
             }
-            
+            return true;
         }
-        public async Task SendConfirmationEmail(string email,string token)
+
+        public async Task<bool> SendConfirmationEmail(string email, string token)
         {
-          
             string message = $@"
             <html>
             <head>
@@ -111,12 +113,13 @@ namespace SkinCa.Business.Services
             </body>
             </html>
         ";
-            await SendEmailAsync(
+            return await SendEmailAsync(
                 email,
                 "Email Confirmation",
                 message);
         }
-        public async Task SendForgotPasswordEmail(string email,string token)
+
+        public async Task<bool> SendForgotPasswordEmail(string email, string token)
         {
             string message = $@"
             <html>
@@ -180,8 +183,8 @@ namespace SkinCa.Business.Services
             </body>
             </html>
         ";
-           
-            await SendEmailAsync(
+
+            return await SendEmailAsync(
                 email,
                 "Reset Password",
                 message);

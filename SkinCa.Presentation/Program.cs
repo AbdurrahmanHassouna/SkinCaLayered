@@ -5,21 +5,23 @@ using Microsoft.AspNetCore.Identity;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.IdentityModel.Tokens;
 using System.Text;
+using SkinCa.Common.Exceptions;
+using SkinCa.Presentation;
 
 var builder = WebApplication.CreateBuilder(args);
-var _configuration = builder.Configuration;
+var configuration = builder.Configuration;
 var builderServices = builder.Services;
 builderServices.AddControllers().ConfigureApiBehaviorOptions(options =>
 {
     options.SuppressModelStateInvalidFilter = true;
 });
 
-builderServices.Configure<JWT>(_configuration.GetSection("JWT"));
-builderServices.Configure<EmailSecrets>(_configuration.GetSection("EmailSecrets"));
+builderServices.Configure<JWT>(configuration.GetSection("JWT"));
+builderServices.Configure<EmailSecrets>(configuration.GetSection("EmailSecrets"));
 
 builderServices.AddDbContext<AppDbContext>(options =>
 {
-    options.UseSqlServer(_configuration.GetConnectionString("SkinCa"));
+    options.UseSqlServer(configuration.GetConnectionString("SkinCa"));
 }); 
 
 builderServices.AddIdentity<ApplicationUser, IdentityRole>(options =>
@@ -28,6 +30,7 @@ builderServices.AddIdentity<ApplicationUser, IdentityRole>(options =>
         options.Tokens.PasswordResetTokenProvider = "Custom";
         options.Tokens.ChangeEmailTokenProvider = "Custom";
         options.Password.RequireNonAlphanumeric = false;
+        options.SignIn.RequireConfirmedEmail = false;
     })
     .AddEntityFrameworkStores<AppDbContext>()
     .AddDefaultTokenProviders()
@@ -45,17 +48,25 @@ builderServices.AddAuthentication(options =>
     o.TokenValidationParameters = new TokenValidationParameters
     {
         ValidateIssuerSigningKey = true,
-        ValidIssuer = _configuration["JWT:Issuer"],
-        ValidAudience = _configuration["JWT:Audience"],
-        IssuerSigningKey = new SymmetricSecurityKey(Encoding.UTF8.GetBytes(_configuration["JWT:Key"]))
+        ValidIssuer = configuration["JWT:Issuer"],
+        ValidAudience = configuration["JWT:Audience"],
+        IssuerSigningKey = new SymmetricSecurityKey(Encoding.UTF8.GetBytes(configuration["JWT:Key"]))
     };
 });
+
+
+builderServices.RegesterBussinessDI();
+builderServices.RegesterRepositoriesDI();
+builder.Services.AddSingleton<ExceptionMiddleware>();
 
 
 builderServices.AddEndpointsApiExplorer();
 builderServices.AddSwaggerGen();
 
 var app = builder.Build();
+
+
+app.UseMiddleware<ExceptionMiddleware>();
 
 app.UseHttpsRedirection();
 
@@ -66,8 +77,6 @@ if (app.Environment.IsDevelopment())
             
 app.UseSwagger();
 app.UseSwaggerUI();
-
-
 
 app.UseAuthentication();
 app.UseAuthorization();

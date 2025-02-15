@@ -8,5 +8,5 @@ public interface IUserService
 {
     Task<ProfileResponseDto?> GetProfileAsync(ClaimsPrincipal user);
     Task<ProfileResponseDto?> UpdateProfileAsync(ProfileRequestDto newProfile,ClaimsPrincipal claimsPrincipal);
-    Task<ProfileResponseDto> UpdateProfilePictureAsync(IFormFile Image ,ClaimsPrincipal claimsPrincipal);
+    Task<ProfileResponseDto?> UpdateProfilePictureAsync(IFormFile Image ,ClaimsPrincipal claimsPrincipal);
 }

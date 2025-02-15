@@ -10,6 +10,7 @@
         <PackageReference Include="Microsoft.AspNetCore.DataProtection" Version="8.0.8"/>
         <PackageReference Include="Microsoft.Extensions.Identity.Core" Version="8.0.8"/>
         <PackageReference Include="Microsoft.Extensions.Options" Version="8.0.2"/>
+        <PackageReference Include="Newtonsoft.Json" Version="13.0.3" />
         <PackageReference Include="otp.net" Version="1.4.0"/>
     </ItemGroup>
     <ItemGroup>

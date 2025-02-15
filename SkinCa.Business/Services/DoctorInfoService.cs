@@ -14,7 +14,7 @@ public class DoctorInfoService: IDoctorInfoService
 {
     private IDoctorInfoRepository _doctorInfoRepository;
     private UserManager<ApplicationUser> _userManager;
-    DoctorInfoService(IDoctorInfoRepository doctorInfoRepository, UserManager<ApplicationUser> userManager)
+    public DoctorInfoService(IDoctorInfoRepository doctorInfoRepository, UserManager<ApplicationUser> userManager)
     {
         _doctorInfoRepository= doctorInfoRepository;
         _userManager = userManager;

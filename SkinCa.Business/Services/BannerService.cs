@@ -3,6 +3,8 @@ using SkinCa.Business.DTOs;
 using SkinCa.Business.ServicesContracts;
 using SkinCa.DataAccess.RepositoriesContracts;
 using Microsoft.EntityFrameworkCore;
+using SkinCa.Common.Exceptions;
+using SkinCa.Common.UtilityExtensions;
 using SkinCa.DataAccess;
 
 namespace SkinCa.Business.Services;
@@ -29,7 +31,7 @@ public class BannerService : IBannerService
         return bannerDtos.ToList();
     }
 
-    public async Task<BannerResponseDto?> EditAsync(int id, BannerRequestDto bannerRequestDto)
+    public async Task<BannerResponseDto> EditAsync(int id, BannerRequestDto bannerRequestDto)
     {
         var banner = new Banner()
         {
@@ -50,20 +52,15 @@ public class BannerService : IBannerService
                 Title = bannerRequestDto.Title,
                 Image = banner.Image
             },
-            false => throw new Exception("Couldn't update banner"),
-            _ => null
+            false => throw new Exception("Couldn't update banner")
         };
     }
 
-    public async Task<bool?> DeleteAsync(int id)
+    public async Task<bool> DeleteAsync(int id)
     {
         var result = await _bannerRepository.DeleteAsync(id); 
-        
-        if (result == false) throw new Exception("Couldn't Delete banner");
         return result;
     }
-
-
     public async Task<bool> CreateAsync(BannerRequestDto bannerRequestDto)
     {
         var banner = new Banner()
@@ -72,10 +69,9 @@ public class BannerService : IBannerService
             Title = bannerRequestDto.Title,
             
         };
-        using var memoryStream = new MemoryStream();
-        await bannerRequestDto.File.CopyToAsync(memoryStream);
-        banner.Image = memoryStream.ToArray();
-        
-       return await _bannerRepository.AddAsync(banner);
+
+        banner.Image = await bannerRequestDto.File.ToBytes();
+
+        return await _bannerRepository.AddAsync(banner);
     }
 }

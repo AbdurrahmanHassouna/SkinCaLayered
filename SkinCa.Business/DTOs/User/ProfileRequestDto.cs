@@ -24,6 +24,6 @@ public class ProfileRequestDto
     public string? Address { get; set; }
     [EmailAddress, StringLength(50)]
     public string Email { get; set; }
-    [Image(["JPEG","PNG","GIF"])]
+    [Image([".jpeg",".png",".gif"])]
     public IFormFile? ProfilePicture { get; set; }
 }

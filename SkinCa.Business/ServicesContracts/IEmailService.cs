@@ -2,7 +2,7 @@
 {
     public interface IEmailService
     {
-        Task SendConfirmationEmail(string email,string token);
-        Task SendForgotPasswordEmail(string email,string token);
+        Task<bool> SendConfirmationEmail(string email,string token);
+        Task<bool> SendForgotPasswordEmail(string email,string token);
     }
 }
