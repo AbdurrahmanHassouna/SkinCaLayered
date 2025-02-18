@@ -11,6 +11,7 @@ using Microsoft.AspNetCore.Mvc.ModelBinding;
 using SkinCa.Business.DTOs;
 using SkinCa.Business.DTOs.User;
 using SkinCa.Business.ServicesContracts;
+using SkinCa.Common;
 
 namespace SkinCaApp.Controllers
 {
@@ -31,10 +32,10 @@ namespace SkinCaApp.Controllers
 
         [HttpPost("register")]
         [Consumes(MediaTypeNames.Multipart.FormData)]
-        [ProducesResponseType(typeof(ActionResult<AuthenticationResponse>),StatusCodes.Status201Created)]
+        [ProducesResponseType(StatusCodes.Status201Created)]
         [ProducesResponseType(StatusCodes.Status400BadRequest)]
         [ProducesResponseType(StatusCodes.Status500InternalServerError)]
-        public async Task<ActionResult<AuthenticationResponse>> RegisterAsync([FromForm] RegistrationRequestDto model)
+        public async Task<IActionResult> RegisterAsync([FromForm] RegistrationRequestDto model)
         {
             if (!ModelState.IsValid)
             {
@@ -42,11 +43,11 @@ namespace SkinCaApp.Controllers
             }
 
             var result = await _authService.RegisterAsync(model);
-            if (!result.IsAuthenticated)
+            if (!result.Succeeded)
             {
                 return BadRequest(result);
             }
-            return Ok(result);
+            return NoContent();
         }
        
         [HttpPost("get-token")]
@@ -79,13 +80,8 @@ namespace SkinCaApp.Controllers
             {
                 return BadRequest(ModelState);
             }
-            var result = await _authService.ForgotPasswordAsync(email);
-            if (result == null)
-            {
-                return  NotFound(new { message = "Email not registered", status = false });
-            }
-            
-            return Ok(new { message = "Token has been sent to your email" });
+            await _authService.ForgotPasswordAsync(email);
+            return Ok(new {status= true, message = "Token has been sent to your email" });
         }
         [HttpPost("verify-reset-password-code")]
         [Consumes(MediaTypeNames.Application.Json)]
@@ -100,11 +96,7 @@ namespace SkinCaApp.Controllers
                 return BadRequest(ModelState);
             }
             var result = await _authService.VerifyResetPasswordToken(token,email);
-            if (result == null)
-            {
-                NotFound(new { message = $"User with {email} not found", status = false });
-            }
-            return result!.Value?Ok(new { status = result,message="Valid token"}):BadRequest(new { status = result, message = "Invalid token" });
+            return result.Succeeded?Ok(OperationResult):BadRequest(new { status = result, message = "Invalid token" });
         }
         [HttpPost("reset-password")]
         [Consumes(MediaTypeNames.Application.Json)]
@@ -135,13 +127,10 @@ namespace SkinCaApp.Controllers
             }
 
             var user = await _authService.GetUserWithEmailAsync(email);
-            var result = await _authService.RequestEmailConfirmationAsync(email);
-            if (result == null)
-            {
-                return NotFound(new { message = "Email not registered", status = false });
-            }
-            return result!.Value?Ok(new { status = result,message="Email sent successfully"})
-                :StatusCode(StatusCodes.Status500InternalServerError,new { status = result,Message = "Failed to Send Email" });
+            await _authService.RequestEmailConfirmationAsync(email);
+
+            return Ok(new { status = true, message = "Email sent successfully" });
+
         }
         [HttpPost("confirm-email")]
         public async Task<IActionResult> ConfirmEmail(string email,string token)

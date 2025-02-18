@@ -26,18 +26,18 @@ public class BookmarkService:IBookmarkService
         ).ToList();
     }
 
-    public async Task<bool?> CreateAsync(BookmarkRequestDto bookmark)
+    public async Task CreateAsync(BookmarkRequestDto bookmark)
     {
         var newBookmark = new Bookmark()
         {
             DiseaseId = bookmark.DiseaseId,
             UserId = bookmark.UserId
         };
-        return await _bookmarkRepository.CreateAsync(newBookmark);
+        await _bookmarkRepository.CreateAsync(newBookmark);
     }
 
-    public async Task<bool?> DeleteAsync(int id)
+    public async Task DeleteAsync(int id)
     {
-        return await _bookmarkRepository.DeleteAsync(id);
+       await _bookmarkRepository.DeleteAsync(id);
     }
 }

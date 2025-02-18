@@ -4,7 +4,7 @@ public interface IBannerRepository
 {
     Task<Banner> GetBannerByIdAsync(int bannerId);
     Task<List<Banner>> GetAllAsync();
-    Task<bool> AddAsync(Banner banner);
-    Task<bool> UpdateAsync(Banner banner);
-    Task<bool> DeleteAsync(int id);
+    Task AddAsync(Banner banner);
+    Task UpdateAsync(Banner banner);
+    Task DeleteAsync(int id);
 }

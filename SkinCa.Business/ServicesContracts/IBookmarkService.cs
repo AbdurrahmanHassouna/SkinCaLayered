@@ -5,6 +5,6 @@ namespace SkinCa.Business.ServicesContracts;
 public interface IBookmarkService
 {
     Task<List<BookmarkResponseDto>> GetAllByUserIdAsync(string userId);
-    Task<bool?> CreateAsync(BookmarkRequestDto bookMark);
-    Task<bool?>  DeleteAsync(int id);
+    Task CreateAsync(BookmarkRequestDto bookMark);
+    Task  DeleteAsync(int id);
 }

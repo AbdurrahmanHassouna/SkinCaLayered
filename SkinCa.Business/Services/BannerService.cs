@@ -31,7 +31,7 @@ public class BannerService : IBannerService
         return bannerDtos.ToList();
     }
 
-    public async Task<BannerResponseDto> EditAsync(int id, BannerRequestDto bannerRequestDto)
+    public async Task EditAsync(int id, BannerRequestDto bannerRequestDto)
     {
         var banner = new Banner()
         {
@@ -39,39 +39,26 @@ public class BannerService : IBannerService
             Description = bannerRequestDto.Description,
             Title = bannerRequestDto.Title
         };
-        using var memoryStream = new MemoryStream();
-        await bannerRequestDto.File.CopyToAsync(memoryStream);
-        banner.Image = memoryStream.ToArray();
-        var result = await _bannerRepository.UpdateAsync(banner);
-        return result switch
-        {
-            true => new BannerResponseDto()
-            {
-                Description = bannerRequestDto.Description,
-                Id = banner.Id,
-                Title = bannerRequestDto.Title,
-                Image = banner.Image
-            },
-            false => throw new Exception("Couldn't update banner")
-        };
+        
+        banner.Image = await bannerRequestDto.File.ToBytesAsync();
+        await _bannerRepository.UpdateAsync(banner);
     }
 
-    public async Task<bool> DeleteAsync(int id)
+    public async Task DeleteAsync(int id)
     {
-        var result = await _bannerRepository.DeleteAsync(id); 
-        return result;
+         await _bannerRepository.DeleteAsync(id);
     }
-    public async Task<bool> CreateAsync(BannerRequestDto bannerRequestDto)
+
+    public async Task CreateAsync(BannerRequestDto bannerRequestDto)
     {
         var banner = new Banner()
         {
             Description = bannerRequestDto.Description,
             Title = bannerRequestDto.Title,
-            
         };
 
-        banner.Image = await bannerRequestDto.File.ToBytes();
+        banner.Image = await bannerRequestDto.File.ToBytesAsync();
 
-        return await _bannerRepository.AddAsync(banner);
+        await _bannerRepository.AddAsync(banner);
     }
 }

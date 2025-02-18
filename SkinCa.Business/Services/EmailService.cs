@@ -1,6 +1,7 @@
 ﻿using System.Net;
 using System.Net.Mail;
 using System.Runtime.InteropServices.Marshalling;
+using Microsoft.Extensions.Logging;
 using Microsoft.Extensions.Options;
 using SkinCa.Business.ServicesContracts;
 using SkinCa.Common;
@@ -10,13 +11,14 @@ namespace SkinCa.Business.Services
     public class EmailService : IEmailService
     {
         private readonly EmailSecrets network;
-
-        public EmailService(IOptions<EmailSecrets> options)
+        private ILogger<EmailService> _logger;
+        public EmailService(IOptions<EmailSecrets> options, ILogger<EmailService> logger)
         {
             network = options.Value;
+            _logger = logger;
         }
 
-        private async Task<bool> SendEmailAsync(string email, string subject, string message)
+        private async Task SendEmailAsync(string email, string subject, string message)
         {
             var stmpClient = new SmtpClient("smtp-mail.outlook.com", 587)
             {
@@ -33,23 +35,12 @@ namespace SkinCa.Business.Services
                 IsBodyHtml = true,
                 Body = message
             };
-            try
-            {
-                await stmpClient.SendMailAsync(mail);
-            }
-            catch (Exception ex)
-            {
-                Console.WriteLine(ex.Message);
-                return false;
-            }
-            finally
-            {
-                stmpClient.Dispose();
-            }
-            return true;
+            
+            await stmpClient.SendMailAsync(mail);
+            
         }
 
-        public async Task<bool> SendConfirmationEmail(string email, string token)
+        public async Task SendConfirmationEmail(string email, string token)
         {
             string message = $@"
             <html>
@@ -112,14 +103,14 @@ namespace SkinCa.Business.Services
                 </div>
             </body>
             </html>
-        ";
-            return await SendEmailAsync(
+            ";
+            await SendEmailAsync(
                 email,
                 "Email Confirmation",
                 message);
         }
 
-        public async Task<bool> SendForgotPasswordEmail(string email, string token)
+        public async Task SendForgotPasswordEmail(string email, string token)
         {
             string message = $@"
             <html>
@@ -183,8 +174,7 @@ namespace SkinCa.Business.Services
             </body>
             </html>
         ";
-
-            return await SendEmailAsync(
+            await SendEmailAsync(
                 email,
                 "Reset Password",
                 message);

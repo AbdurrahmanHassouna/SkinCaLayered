@@ -1,9 +1,12 @@
 ﻿using System.Security.Claims;
 using Microsoft.AspNetCore.Http;
 using Microsoft.AspNetCore.Identity;
+using Microsoft.Extensions.Logging;
 using SkinCa.Business.DTOs.User;
 using SkinCa.Business.ServicesContracts;
 using SkinCa.Common;
+using SkinCa.Common.Exceptions;
+using SkinCa.Common.UtilityExtensions;
 using SkinCa.DataAccess;
 
 namespace SkinCa.Business.Services;
@@ -11,16 +14,22 @@ namespace SkinCa.Business.Services;
 public class UserService : IUserService
 {
     private UserManager<ApplicationUser> _userManager;
-
-    public UserService(UserManager<ApplicationUser> userManager)
+    private ILogger<UserService> _logger;
+    public UserService(UserManager<ApplicationUser> userManager, ILogger<UserService> logger)
     {
         _userManager = userManager;
+        _logger = logger;
     }
-    public async Task<ProfileResponseDto?> GetProfileAsync(ClaimsPrincipal claimsPrincipal)
+    public async Task<ProfileResponseDto> GetProfileAsync(ClaimsPrincipal claimsPrincipal)
     {
         var user = await _userManager.GetUserAsync(claimsPrincipal);
-        if (user== null) return null;
-
+        if (user == null)
+        {
+            _logger.LogError("Unable to retrieve user with {claims principal} at {Method}"
+                ,claimsPrincipal,nameof(UpdateProfileAsync));
+            throw new NotFoundException("Could not find user");
+        }
+        
         ProfileResponseDto profile = new ProfileResponseDto
         {
             Email       = user.Email,
@@ -48,10 +57,14 @@ public class UserService : IUserService
 
         return age;
     }
-    public async Task<ProfileResponseDto?> UpdateProfileAsync(ProfileRequestDto newProfile, ClaimsPrincipal claimsPrincipal)
+    public async Task<IdentityResult> UpdateProfileAsync(ProfileRequestDto newProfile, ClaimsPrincipal claimsPrincipal)
     {
         var user = await _userManager.GetUserAsync(claimsPrincipal);
-        if (user== null) return null;
+        if (user == null)
+        {
+            _logger.LogError("Unable to retrieve user with {claims principal} at {Method}",claimsPrincipal,nameof(UpdateProfileAsync));
+            throw new NotFoundException("Could not find user");
+        }
         user.Email = newProfile.Email;
         user.FirstName = newProfile.FirstName;
         user.LastName = newProfile.LastName;
@@ -61,67 +74,27 @@ public class UserService : IUserService
         user.BirthDate = newProfile.BirthDate;
         user.PhoneNumber  = newProfile.PhoneNumber;
         user.Governorate =(short)newProfile.Governorate;
-        using MemoryStream memoryStream = new MemoryStream();
         if (newProfile.ProfilePicture != null)
         {
-            await newProfile.ProfilePicture.CopyToAsync(memoryStream);
+            user.ProfilePicture = await newProfile.ProfilePicture.ToBytesAsync();
         }
-        user.ProfilePicture = memoryStream.ToArray();
-        var result = await _userManager.UpdateAsync(user);
-        if (result.Succeeded)
-        {
-            ProfileResponseDto profile = new ProfileResponseDto
-            {
-                Email       = user.Email,
-                FirstName   = user.FirstName,
-                LastName    = user.LastName,
-                Address     = user.Address,
-                Latitude    = user.Latitude,
-                Longitude   = user.Longitude,
-                Age   = CalculateAge(user.BirthDate),
-                PhoneNumber = user.PhoneNumber,
-                ProfilePicture = user.ProfilePicture,
-                Governorate = (Governorate)user.Governorate
-            };
-        
-            return profile;
-        }
-        return null;
+
+        return await _userManager.UpdateAsync(user);
     }
 
-    public async Task<ProfileResponseDto?> UpdateProfilePictureAsync(IFormFile Image, ClaimsPrincipal claimsPrincipal)
+    public async Task<IdentityResult> UpdateProfilePictureAsync(IFormFile image, ClaimsPrincipal claimsPrincipal)
     {
        
         var user = await _userManager.GetUserAsync(claimsPrincipal);
-        if (user == null) return null;
-
-        
-        using MemoryStream memoryStream = new MemoryStream();
-        await Image.CopyToAsync(memoryStream); 
-        user.ProfilePicture = memoryStream.ToArray(); 
-
-        
-        var result = await _userManager.UpdateAsync(user);
-        if (result.Succeeded)
+        if (user == null)
         {
-            
-            ProfileResponseDto profile = new ProfileResponseDto
-            {
-                Email = user.Email,
-                FirstName = user.FirstName,
-                LastName = user.LastName,
-                Address = user.Address,
-                Latitude = user.Latitude,
-                Longitude = user.Longitude,
-                Age = CalculateAge(user.BirthDate),
-                PhoneNumber = user.PhoneNumber,
-                ProfilePicture = user.ProfilePicture,
-                Governorate = (Governorate)user.Governorate
-            };
-
-            return profile;
+            _logger.LogError("Unable to retrieve user with {claims principal} at {Method}",claimsPrincipal,nameof(UpdateProfileAsync));
+            throw new NotFoundException("Could not find user");
         }
-
-        return null;
+        
+        user.ProfilePicture =await image.ToBytesAsync();
+        var result = await _userManager.UpdateAsync(user);
+        
+        return result;
     }
 }

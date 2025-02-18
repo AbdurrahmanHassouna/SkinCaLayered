@@ -7,6 +7,6 @@ public interface IScanResultService
 {
     Task<ScanResultResponseDto?> GetByIdAsync(int id);
     Task<List<ScanResultResponseDto>> GetAllByUserIdAsync(int userId);
-    Task<bool>  CreateAsync(ScanResultRequestDto scanResultRequestDto);
-    Task<bool?>  DeleteAsync(int id);
+    Task CreateAsync(ScanResultRequestDto scanResultRequestDto);
+    Task DeleteAsync(int id);
 }

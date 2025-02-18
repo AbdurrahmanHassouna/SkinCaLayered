@@ -3,68 +3,74 @@ using Microsoft.Extensions.Logging;
 using SkinCa.Common.Exceptions;
 using SkinCa.DataAccess.RepositoriesContracts;
 
-namespace SkinCa.DataAccess.Repositories;
-
-public class MessageRepository : IMessageRepository
+namespace SkinCa.DataAccess.Repositories
 {
-    private readonly AppDbContext _context;
-    private readonly ILogger<MessageRepository> _logger;
-
-    public MessageRepository(AppDbContext context, ILogger<MessageRepository> logger)
+    public class MessageRepository : IMessageRepository
     {
-        _context = context;
-        _logger = logger;
-    }
+        private readonly AppDbContext _context;
+        private readonly ILogger<MessageRepository> _logger;
 
-    public async Task<bool> EditAsync(Message message)
-    {
-        try
+        public MessageRepository(AppDbContext context, ILogger<MessageRepository> logger)
         {
-            var existingMessage = await _context.Messages.FindAsync(message.Id);
-            if (existingMessage == null) throw new NotFoundException($"Message with ID {message.Id} not found");
-
-            existingMessage.Content = message.Content;
-            existingMessage.Image = message.Image;
-            existingMessage.Status = message.Status;
-
-            _context.Messages.Update(existingMessage);
-            return await _context.SaveChangesAsync() > 0;
+            _context = context;
+            _logger = logger;
         }
-        catch (DbUpdateException ex)
-        {
-            _logger.LogError(ex, "Error updating message {MessageId}", message.Id);
-            throw new RepositoryException("Error updating message", ex);
-        }
-    }
 
-    public async Task<bool> CreateAsync(Message message)
-    {
-        try
+        public async Task EditAsync(Message message)
         {
-            await _context.Messages.AddAsync(message);
-            return await _context.SaveChangesAsync() > 0;
-        }
-        catch (DbUpdateException ex)
-        {
-            _logger.LogError(ex, "Error creating message");
-            throw new RepositoryException("Error creating message", ex);
-        }
-    }
+            try
+            {
+                var existingMessage = await _context.Messages.FindAsync(message.Id);
+                if (existingMessage == null)
+                    throw new NotFoundException($"Message with ID {message.Id} not found");
 
-    public async Task<bool> DeleteAsync(int id)
-    {
-        try
-        {
-            var message = await _context.Messages.FindAsync(id);
-            if (message == null) throw new NotFoundException($"Message with ID {id} not found");
+                existingMessage.Content = message.Content;
+                existingMessage.Image = message.Image;
+                existingMessage.Status = message.Status;
 
-            _context.Messages.Remove(message);
-            return await _context.SaveChangesAsync() > 0;
+                _context.Messages.Update(existingMessage);
+                if (await _context.SaveChangesAsync() == 0)
+                    throw new RepositoryException("No changes were saved to the database while updating the message");
+            }
+            catch (DbUpdateException ex)
+            {
+                _logger.LogError(ex, "Error updating message {MessageId}", message.Id);
+                throw new RepositoryException("Error updating message", ex);
+            }
         }
-        catch (DbUpdateException ex)
+
+        public async Task CreateAsync(Message message)
         {
-            _logger.LogError(ex, "Error deleting message {MessageId}", id);
-            throw new RepositoryException("Error deleting message", ex);
+            try
+            {
+                await _context.Messages.AddAsync(message);
+                if (await _context.SaveChangesAsync() == 0)
+                    throw new RepositoryException("No changes were saved to the database while creating the message");
+            }
+            catch (DbUpdateException ex)
+            {
+                _logger.LogError(ex, "Error creating message");
+                throw new RepositoryException("Error creating message", ex);
+            }
+        }
+
+        public async Task DeleteAsync(int id)
+        {
+            try
+            {
+                var message = await _context.Messages.FindAsync(id);
+                if (message == null)
+                    throw new NotFoundException($"Message with ID {id} not found");
+
+                _context.Messages.Remove(message);
+                if (await _context.SaveChangesAsync() == 0)
+                    throw new RepositoryException("No changes were saved to the database while deleting the message");
+            }
+            catch (DbUpdateException ex)
+            {
+                _logger.LogError(ex, "Error deleting message {MessageId}", id);
+                throw new RepositoryException("Error deleting message", ex);
+            }
         }
     }
 }

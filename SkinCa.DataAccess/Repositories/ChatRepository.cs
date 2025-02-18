@@ -3,98 +3,104 @@ using Microsoft.Extensions.Logging;
 using SkinCa.Common.Exceptions;
 using SkinCa.DataAccess.RepositoriesContracts;
 
-namespace SkinCa.DataAccess.Repositories;
-
-public class ChatRepository : IChatRepository
+namespace SkinCa.DataAccess.Repositories
 {
-    private readonly AppDbContext _context;
-    private readonly ILogger<ChatRepository> _logger;
-
-    public ChatRepository(AppDbContext context, ILogger<ChatRepository> logger)
+    public class ChatRepository : IChatRepository
     {
-        _context = context;
-        _logger = logger;
-    }
+        private readonly AppDbContext _context;
+        private readonly ILogger<ChatRepository> _logger;
 
-    public async Task<bool> CreateAsync(Chat chat)
-    {
-        try
+        public ChatRepository(AppDbContext context, ILogger<ChatRepository> logger)
         {
-            await _context.Chats.AddAsync(chat);
-            return await _context.SaveChangesAsync() > 0;
+            _context = context;
+            _logger = logger;
         }
-        catch (DbUpdateException e)
-        {
-            _logger.LogError(e, "Error creating chat ");
-            throw new RepositoryException("Error occurred while creating chat", e);
-        }
-    }
 
-    public async Task<bool> DeleteAsync(int id)
-    {
-        try
+        public async Task CreateAsync(Chat chat)
         {
-            var chat = await _context.Chats.FindAsync(id);
-            if (chat == null) throw new NotFoundException($"Chat with id: {id} not found");
-            
-            _context.Chats.Remove(chat);
-            return await _context.SaveChangesAsync() > 0;
+            try
+            {
+                await _context.Chats.AddAsync(chat);
+                if (await _context.SaveChangesAsync() == 0)
+                    throw new RepositoryException("No changes were saved to the database while creating the chat.");
+            }
+            catch (DbUpdateException e)
+            {
+                _logger.LogError(e, "Error occurred while creating the chat.");
+                throw new RepositoryException("Error occurred while creating the chat.", e);
+            }
         }
-        catch (DbUpdateException e)
-        {
-            _logger.LogError(e, "Error deleting chat");
-            throw new RepositoryException("Error occurred while deleting chat", e);
-        }
-    }
 
-    public async Task<List<Chat>> GetAllByUserIdAsync(string userId)
-    {
-        try
+        public async Task DeleteAsync(int id)
         {
-            return await _context.Chats
-                .Where(c => c.Users.Any(u => u.Id == userId))
-                .ToListAsync();
-        }
-        catch (DbUpdateException e)
-        {
-            _logger.LogError(e, $"Error retrieving chats{nameof(GetAllByUserIdAsync)}");
-            throw new RepositoryException("Error occurred while retrieving chats", e);
-        }
-    }
+            try
+            {
+                var chat = await _context.Chats.FindAsync(id);
+                if (chat == null)
+                    throw new NotFoundException($"Chat with id: {id} not found.");
 
-    public async Task<Chat?> GetByIdAsync(int chatId)
-    {
-        try
-        {
-            return await _context.Chats
-                .Include(c => c.Users)
-                .Include(c => c.Messages)
-                .FirstOrDefaultAsync(c => c.Id == chatId);
+                _context.Chats.Remove(chat);
+                if (await _context.SaveChangesAsync() == 0)
+                    throw new RepositoryException("No changes were saved to the database while deleting the chat.");
+            }
+            catch (DbUpdateException e)
+            {
+                _logger.LogError(e, "Error occurred while deleting the chat with id: {ChatId}", id);
+                throw new RepositoryException("Error occurred while deleting the chat.", e);
+            }
         }
-        catch (DbUpdateException e)
+
+        public async Task<List<Chat>> GetAllByUserIdAsync(string userId)
         {
-            _logger.LogError(e, $"Error retrieving chat at {nameof(GetByIdAsync)}");
-            throw new RepositoryException("Error occurred while retrieving chat", e);
+            try
+            {
+                return await _context.Chats
+                    .Where(c => c.Users.Any(u => u.Id == userId))
+                    .ToListAsync();
+            }
+            catch (DbUpdateException e)
+            {
+                _logger.LogError(e, "Error retrieving chats in {Method} for user with id: {UserId}", nameof(GetAllByUserIdAsync), userId);
+                throw new RepositoryException("Error occurred while retrieving chats.", e);
+            }
         }
-    }
 
-    public async Task<bool> DeleteMessagesAsync(int chatId)
-    {
-        try
+        public async Task<Chat?> GetByIdAsync(int chatId)
         {
-            var chat = await _context.Chats
-                .Include(c => c.Messages)
-                .FirstOrDefaultAsync(c => c.Id == chatId);
-
-            if (chat == null) throw new NotFoundException($"Chat with id: {chatId} not found");
-
-            _context.Messages.RemoveRange(chat.Messages);
-            return await _context.SaveChangesAsync() > 0;
+            try
+            {
+                return await _context.Chats
+                    .Include(c => c.Users)
+                    .Include(c => c.Messages)
+                    .FirstOrDefaultAsync(c => c.Id == chatId);
+            }
+            catch (DbUpdateException e)
+            {
+                _logger.LogError(e, "Error retrieving chat in {Method} for chat id: {ChatId}", nameof(GetByIdAsync), chatId);
+                throw new RepositoryException("Error occurred while retrieving chat.", e);
+            }
         }
-        catch(DbUpdateException e)
+
+        public async Task DeleteMessagesAsync(int chatId)
         {
-            _logger.LogError(e, "Database error");
-            throw new RepositoryException("Error occurred while deleting messages", e);
+            try
+            {
+                var chat = await _context.Chats
+                    .Include(c => c.Messages)
+                    .FirstOrDefaultAsync(c => c.Id == chatId);
+
+                if (chat == null)
+                    throw new NotFoundException($"Chat with id: {chatId} not found.");
+
+                _context.Messages.RemoveRange(chat.Messages);
+                if (await _context.SaveChangesAsync() == 0)
+                    throw new RepositoryException("No changes were saved to the database while deleting messages.");
+            }
+            catch (DbUpdateException e)
+            {
+                _logger.LogError(e, "Error occurred while deleting messages for chat with id: {ChatId}", chatId);
+                throw new RepositoryException("Error occurred while deleting messages.", e);
+            }
         }
     }
 }

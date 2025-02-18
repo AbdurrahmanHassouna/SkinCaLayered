@@ -7,7 +7,7 @@ namespace SkinCa.Business.ServicesContracts;
 public interface IBannerService
 {
     Task<List<BannerResponseDto>> GetAllAsync();
-    Task<BannerResponseDto> EditAsync(int id, BannerRequestDto bannerRequestDto);
-    Task<bool> DeleteAsync(int id);
-    Task<bool> CreateAsync(BannerRequestDto bannerRequestDto);
+    Task EditAsync(int id, BannerRequestDto bannerRequestDto);
+    Task DeleteAsync(int id);
+    Task CreateAsync(BannerRequestDto bannerRequestDto);
 }

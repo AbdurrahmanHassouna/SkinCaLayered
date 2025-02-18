@@ -1,5 +1,6 @@
 ﻿using SkinCa.Business.DTOs;
 using SkinCa.Business.ServicesContracts;
+using SkinCa.Common.UtilityExtensions;
 using SkinCa.DataAccess;
 using SkinCa.DataAccess.RepositoriesContracts;
 
@@ -51,7 +52,7 @@ public class DiseaseService : IDiseaseService
         }).ToList();
     }
 
-    public async Task<bool> CreateAsync(DiseaseRequestDto diseaseRequestDto)
+    public async Task CreateAsync(DiseaseRequestDto diseaseRequestDto)
     {
         var disease = new Disease
         {
@@ -64,14 +65,12 @@ public class DiseaseService : IDiseaseService
             DiagnosticMethods = diseaseRequestDto.DiagnosticMethods,
             Prevention = diseaseRequestDto.Prevention
         };
-        using var memoryStream = new MemoryStream();
-        await diseaseRequestDto.Image.CopyToAsync(memoryStream);
-        disease.Image=memoryStream.ToArray();
+        disease.Image=await diseaseRequestDto.Image.ToBytesAsync();
         
-        return await _diseaseRepository.CreateAsync(disease);
+        await _diseaseRepository.CreateAsync(disease);
     }
 
-    public async Task<bool> EditAsync(int id,DiseaseRequestDto diseaseRequestDto)
+    public async Task EditAsync(int id,DiseaseRequestDto diseaseRequestDto)
     {
         var disease = new Disease
         {
@@ -85,11 +84,9 @@ public class DiseaseService : IDiseaseService
             DiagnosticMethods = diseaseRequestDto.DiagnosticMethods,
             Prevention = diseaseRequestDto.Prevention
         };
-        using var memoryStream = new MemoryStream();
-        await diseaseRequestDto.Image.CopyToAsync(memoryStream);
-        disease.Image=memoryStream.ToArray();
+        disease.Image=await diseaseRequestDto.Image.ToBytesAsync();
         
-        return await _diseaseRepository.EditAsync(disease);
+         await _diseaseRepository.EditAsync(disease);
     }
 
     public async Task<List<DiseaseResponseDto>> SearchAsync(string searchString)
@@ -110,9 +107,9 @@ public class DiseaseService : IDiseaseService
         }).ToList();
     }
 
-    public async Task<bool> DeleteAsync(int id)
+    public async Task DeleteAsync(int id)
     {
-        return await _diseaseRepository.DeleteAsync(id);
+        await _diseaseRepository.DeleteAsync(id);
     }
 }
 

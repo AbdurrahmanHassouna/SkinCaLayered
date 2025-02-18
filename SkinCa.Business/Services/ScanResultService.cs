@@ -43,7 +43,7 @@ public class ScanResultService : IScanResultService
         }).ToList();
     }
 
-    public async Task<bool> CreateAsync(ScanResultRequestDto scanResultRequestDto)
+    public async Task CreateAsync(ScanResultRequestDto scanResultRequestDto)
     {
         var scanResult = new ScanResult
         {
@@ -51,12 +51,11 @@ public class ScanResultService : IScanResultService
             Data = scanResultRequestDto.Data,
             Confidence = scanResultRequestDto.Confidence
         };
-
-        return await _scanResultRepository.CreateAsync(scanResult);
+        await _scanResultRepository.CreateAsync(scanResult);
     }
 
-    public async Task<bool?> DeleteAsync(int id)
+    public async Task DeleteAsync(int id)
     {
-        return await _scanResultRepository.DeleteAsync(id);
+        await _scanResultRepository.DeleteAsync(id);
     }
 }

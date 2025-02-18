@@ -4,7 +4,7 @@ namespace SkinCa.Common.UtilityExtensions;
 
 public static class FileUtiltyExtensions
 {
-    public static async Task<byte[]> ToBytes(this IFormFile file)
+    public static async Task<byte[]> ToBytesAsync(this IFormFile file)
     {
         using var memoryStream = new MemoryStream();
         await file.CopyToAsync(memoryStream);

@@ -47,12 +47,10 @@ public class BannerController : ControllerBase
         {
             if (!ModelState.IsValid)
                 return BadRequest(ModelState);
+            await _bannerService.CreateAsync(bannerRequestDto);
 
-            var result = await _bannerService.CreateAsync(bannerRequestDto);
-            
-            return result 
-                ? Created() 
-                : BadRequest("Failed to create banner");
+
+            return Created();
         }
         catch (Exception ex)
         {
@@ -63,22 +61,19 @@ public class BannerController : ControllerBase
     // PUT: api/Banner/5
     [HttpPut("{id}")]
     [Consumes(MediaTypeNames.Multipart.FormData)]
-    [ProducesResponseType(typeof(BannerResponseDto), StatusCodes.Status200OK)]
+    [ProducesResponseType(StatusCodes.Status204NoContent)]
     [ProducesResponseType(StatusCodes.Status400BadRequest)]
     [ProducesResponseType(StatusCodes.Status404NotFound)]
     [ProducesResponseType(StatusCodes.Status500InternalServerError)]
-    public async Task<ActionResult<BannerResponseDto>> UpdateBanner(int id, [FromForm] BannerRequestDto bannerRequestDto)
+    public async Task<IActionResult> UpdateBanner(int id, [FromForm] BannerRequestDto bannerRequestDto)
     {
         try
         {
             if (!ModelState.IsValid)
                 return BadRequest(ModelState);
 
-            var updatedBanner = await _bannerService.EditAsync(id, bannerRequestDto);
-
-            return updatedBanner != null 
-                ? Ok(updatedBanner) 
-                : NotFound($"Banner with ID {id} not found");
+            await _bannerService.EditAsync(id, bannerRequestDto);
+            return NoContent();
         }
         catch (Exception ex)
         {
@@ -96,13 +91,8 @@ public class BannerController : ControllerBase
     {
         try
         {
-            var result = await _bannerService.DeleteAsync(id);
-
-            return result switch
-            {
-                true => NoContent(),
-                false => BadRequest("Failed to delete banner")
-            };
+            await _bannerService.DeleteAsync(id);
+            return NoContent();
         }
         catch (Exception ex)
         {

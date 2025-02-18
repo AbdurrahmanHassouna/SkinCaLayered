@@ -1,10 +1,13 @@
 ﻿using GeoCoordinatePortable;
 using Microsoft.AspNetCore.Identity;
+using Microsoft.Extensions.Logging;
 using SkinCa.Business.DTOs;
 using SkinCa.Business.DTOs.DoctorInfo;
 using SkinCa.Business.DTOs.WorkingDay;
 using SkinCa.Business.ServicesContracts;
 using SkinCa.Common;
+using SkinCa.Common.Exceptions;
+using SkinCa.Common.UtilityExtensions;
 using SkinCa.DataAccess;
 using SkinCa.DataAccess.RepositoriesContracts;
 
@@ -14,10 +17,12 @@ public class DoctorInfoService: IDoctorInfoService
 {
     private IDoctorInfoRepository _doctorInfoRepository;
     private UserManager<ApplicationUser> _userManager;
-    public DoctorInfoService(IDoctorInfoRepository doctorInfoRepository, UserManager<ApplicationUser> userManager)
+    private Logger<DoctorInfoService> _logger;
+    public DoctorInfoService(IDoctorInfoRepository doctorInfoRepository, UserManager<ApplicationUser> userManager, Logger<DoctorInfoService> logger)
     {
         _doctorInfoRepository= doctorInfoRepository;
         _userManager = userManager;
+        _logger = logger;
     }
     public async Task<IList<DoctorSummaryDto>> GetDoctorsInfoAsync()
     {
@@ -90,12 +95,12 @@ public class DoctorInfoService: IDoctorInfoService
         }).ToList();
     }
 
-    public async Task<bool> CreateDoctorInfoAsync(DoctorInfoRequestDto doctorInfoDto)
+    public async Task<OperationResult<IEnumerable<IdentityError>>> CreateDoctorInfoAsync(DoctorInfoRequestDto doctorInfoDto)
     {
         var model = (RegistrationRequestDto)doctorInfoDto;
         if (await _userManager.FindByEmailAsync(model.Email) is not null)
         {
-            return false;
+            throw new ServiceException($"Email {model.Email} is already in use.");
         }
 
         var user = new ApplicationUser
@@ -113,18 +118,17 @@ public class DoctorInfoService: IDoctorInfoService
         };
         if (model.ProfilePicture != null)
         {
-            using(var memoryStream = new MemoryStream())
-            {
-                await model.ProfilePicture.CopyToAsync(memoryStream);
-                user.ProfilePicture = memoryStream.ToArray();
-            }
+            user.ProfilePicture = await model.ProfilePicture.ToBytesAsync();
         }
         var result = await _userManager.CreateAsync(user, model.Password.Trim());
         if (!result.Succeeded)
         {
-            return false;
+            return new OperationResult<IEnumerable<IdentityError>>()
+            {
+                Success = false,
+                Data = result.Errors
+            };
         }
-
         var doctorInfo = new DoctorInfo()
         {
             UserId = user.Id,
@@ -140,13 +144,18 @@ public class DoctorInfoService: IDoctorInfoService
             Specialization = doctorInfoDto.Specialization,
             Services = string.Join(",", doctorInfoDto.Services)
         };
-         return await _doctorInfoRepository.CreateAsync(doctorInfo);
+        await _doctorInfoRepository.CreateAsync(doctorInfo);
+        return new OperationResult<IEnumerable<IdentityError>>()
+        {
+            Success = true,
+            Message = "Doctor info created successfully"
+        };
     }
 
-    public async Task<bool?> UpdateDoctorInfoAsync(string userId,DoctorInfoRequestDto doctorInfoRequestDto)
+    public async Task<OperationResult<IEnumerable<IdentityError>>> UpdateDoctorInfoAsync(string userId,DoctorInfoRequestDto doctorInfoRequestDto)
     {
         var doctorInfo = await _doctorInfoRepository.GetDoctorInfoAsync(userId);
-        if (doctorInfo == null) return null;
+       
         doctorInfo.ClinicFees = doctorInfoRequestDto.ClinicFees;
         doctorInfo.Description = doctorInfoRequestDto.Description;
         doctorInfo.WorkingDays = doctorInfoRequestDto.WorkingDays.Select(w=> new DoctorWorkingDay()
@@ -158,8 +167,9 @@ public class DoctorInfoService: IDoctorInfoService
         doctorInfo.Experience = doctorInfoRequestDto.Experience;
         doctorInfo.Specialization = doctorInfoRequestDto.Specialization;
         doctorInfo.Services = string.Join(",", doctorInfoRequestDto.Services);
-        var succeeded = await _doctorInfoRepository.UpdateAsync(doctorInfo);
-        if(succeeded != true) return succeeded;
+        
+        await _doctorInfoRepository.UpdateAsync(doctorInfo);
+        
         var model = (RegistrationRequestDto)doctorInfoRequestDto;
         doctorInfo.User.UserName = model.Email.Trim();
         doctorInfo.User.Email = model.Email.Trim();
@@ -171,12 +181,26 @@ public class DoctorInfoService: IDoctorInfoService
         doctorInfo.User.Governorate = (short)model.Governorate;
         doctorInfo.User.Latitude = model.Latitude;
         doctorInfo.User.Longitude = model.Longitude;
+        
         var result = await _userManager.UpdateAsync(doctorInfo.User);
-        return result.Succeeded;
+        if (!result.Succeeded)
+        {
+            return new OperationResult<IEnumerable<IdentityError>>()
+            {
+                Success = false,
+                Data = result.Errors
+            };
+        }
+
+        return new OperationResult<IEnumerable<IdentityError>>()
+        {
+            Success = true,
+            Message = "Doctor has been updated successfully."
+        };
     }
 
-    public async Task<bool?> DeleteDoctorInfoAsync(string userId)
-    {
-        return await _doctorInfoRepository.DeleteAsync(userId);
+    public async Task DeleteDoctorInfoAsync(string userId)
+    { 
+        await _doctorInfoRepository.DeleteAsync(userId);
     }
 }

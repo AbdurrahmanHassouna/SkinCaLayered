@@ -4,10 +4,10 @@ public interface IDiseaseRepository
 {
     Task<Disease?> GetByIdAsync(int id);
     Task<List<Disease>> GetAllAsync();
-    Task<bool> EditAsync(Disease disease);
+    Task EditAsync(Disease disease);
     Task<List<Disease>> SearchAsync(string searchString);
-    Task<bool>  CreateAsync(Disease disease);
+    Task CreateAsync(Disease disease);
     
-    Task<bool>  DeleteAsync(int id);
+    Task DeleteAsync(int id);
     
 }
