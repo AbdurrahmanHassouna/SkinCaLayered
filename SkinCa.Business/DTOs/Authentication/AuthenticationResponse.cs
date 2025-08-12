@@ -1,6 +1,4 @@
-﻿using System.ComponentModel.DataAnnotations;
-
-namespace SkinCa.Business.DTOs
+﻿namespace SkinCa.Business.DTOs
 {
     public class AuthenticationResponse
     {

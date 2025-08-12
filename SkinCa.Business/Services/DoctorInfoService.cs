@@ -17,8 +17,8 @@ public class DoctorInfoService: IDoctorInfoService
 {
     private IDoctorInfoRepository _doctorInfoRepository;
     private UserManager<ApplicationUser> _userManager;
-    private Logger<DoctorInfoService> _logger;
-    public DoctorInfoService(IDoctorInfoRepository doctorInfoRepository, UserManager<ApplicationUser> userManager, Logger<DoctorInfoService> logger)
+    private ILogger<DoctorInfoService> _logger;
+    public DoctorInfoService(IDoctorInfoRepository doctorInfoRepository, UserManager<ApplicationUser> userManager, ILogger<DoctorInfoService> logger)
     {
         _doctorInfoRepository= doctorInfoRepository;
         _userManager = userManager;
@@ -39,10 +39,9 @@ public class DoctorInfoService: IDoctorInfoService
         }).ToList();
     }
 
-    public async Task<DoctorInfoResponseDto?> GetDoctorsInfoAsync(string id)
+    public async Task<DoctorInfoResponseDto> GetDoctorsInfoAsync(string id)
     {
         var doctor =await _doctorInfoRepository.GetDoctorInfoAsync(id);
-        if(doctor == null) return null;
         return new DoctorInfoResponseDto
         {
             UserId = id,
@@ -95,7 +94,7 @@ public class DoctorInfoService: IDoctorInfoService
         }).ToList();
     }
 
-    public async Task<OperationResult<IEnumerable<IdentityError>>> CreateDoctorInfoAsync(DoctorInfoRequestDto doctorInfoDto)
+    public async Task<IdentityResult> CreateDoctorInfoAsync(DoctorInfoRequestDto doctorInfoDto)
     {
         var model = (RegistrationRequestDto)doctorInfoDto;
         if (await _userManager.FindByEmailAsync(model.Email) is not null)
@@ -123,11 +122,7 @@ public class DoctorInfoService: IDoctorInfoService
         var result = await _userManager.CreateAsync(user, model.Password.Trim());
         if (!result.Succeeded)
         {
-            return new OperationResult<IEnumerable<IdentityError>>()
-            {
-                Success = false,
-                Data = result.Errors
-            };
+            return result;
         }
         var doctorInfo = new DoctorInfo()
         {
@@ -145,20 +140,16 @@ public class DoctorInfoService: IDoctorInfoService
             Services = string.Join(",", doctorInfoDto.Services)
         };
         await _doctorInfoRepository.CreateAsync(doctorInfo);
-        return new OperationResult<IEnumerable<IdentityError>>()
-        {
-            Success = true,
-            Message = "Doctor info created successfully"
-        };
+        return result;
     }
 
-    public async Task<OperationResult<IEnumerable<IdentityError>>> UpdateDoctorInfoAsync(string userId,DoctorInfoRequestDto doctorInfoRequestDto)
+    public async Task<IdentityResult> UpdateDoctorInfoAsync(string userId, DoctorInfoRequestDto doctorInfoRequestDto)
     {
         var doctorInfo = await _doctorInfoRepository.GetDoctorInfoAsync(userId);
-       
+        
         doctorInfo.ClinicFees = doctorInfoRequestDto.ClinicFees;
         doctorInfo.Description = doctorInfoRequestDto.Description;
-        doctorInfo.WorkingDays = doctorInfoRequestDto.WorkingDays.Select(w=> new DoctorWorkingDay()
+        doctorInfo.WorkingDays = doctorInfoRequestDto.WorkingDays.Select(w => new DoctorWorkingDay()
         {
             Day = w.Day,
             OpenAt = w.OpenAt,
@@ -167,37 +158,26 @@ public class DoctorInfoService: IDoctorInfoService
         doctorInfo.Experience = doctorInfoRequestDto.Experience;
         doctorInfo.Specialization = doctorInfoRequestDto.Specialization;
         doctorInfo.Services = string.Join(",", doctorInfoRequestDto.Services);
-        
-        await _doctorInfoRepository.UpdateAsync(doctorInfo);
-        
-        var model = (RegistrationRequestDto)doctorInfoRequestDto;
-        doctorInfo.User.UserName = model.Email.Trim();
-        doctorInfo.User.Email = model.Email.Trim();
-        doctorInfo.User.PhoneNumber = model.PhoneNumber.Trim();
-        doctorInfo.User.FirstName = model.FirstName.Trim();
-        doctorInfo.User.LastName = model.LastName.Trim();
-        doctorInfo.User.BirthDate = model.BirthDate;
-        doctorInfo.User.Address = model.Address?.Trim();
-        doctorInfo.User.Governorate = (short)model.Governorate;
-        doctorInfo.User.Latitude = model.Latitude;
-        doctorInfo.User.Longitude = model.Longitude;
-        
-        var result = await _userManager.UpdateAsync(doctorInfo.User);
-        if (!result.Succeeded)
-        {
-            return new OperationResult<IEnumerable<IdentityError>>()
-            {
-                Success = false,
-                Data = result.Errors
-            };
-        }
 
-        return new OperationResult<IEnumerable<IdentityError>>()
-        {
-            Success = true,
-            Message = "Doctor has been updated successfully."
-        };
+        await _doctorInfoRepository.UpdateAsync(doctorInfo);
+
+        
+        var user = doctorInfo.User;
+        user.UserName = doctorInfoRequestDto.Email.Trim();
+        user.Email = doctorInfoRequestDto.Email.Trim();
+        user.PhoneNumber = doctorInfoRequestDto.PhoneNumber.Trim();
+        user.FirstName = doctorInfoRequestDto.FirstName.Trim();
+        user.LastName = doctorInfoRequestDto.LastName.Trim();
+        user.BirthDate = doctorInfoRequestDto.BirthDate;
+        user.Address = doctorInfoRequestDto.Address?.Trim();
+        user.Governorate = (short)doctorInfoRequestDto.Governorate;
+        user.Latitude = doctorInfoRequestDto.Latitude;
+        user.Longitude = doctorInfoRequestDto.Longitude;
+
+        var result = await _userManager.UpdateAsync(user);
+        return result;
     }
+
 
     public async Task DeleteDoctorInfoAsync(string userId)
     { 

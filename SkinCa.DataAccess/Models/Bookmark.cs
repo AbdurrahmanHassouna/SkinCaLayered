@@ -1,6 +1,4 @@
-﻿using Microsoft.EntityFrameworkCore.Storage.ValueConversion;
-
-namespace SkinCa.DataAccess
+﻿namespace SkinCa.DataAccess
 {
     public class Bookmark:Entity<int>
     {

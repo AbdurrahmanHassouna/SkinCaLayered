@@ -1,6 +1,5 @@
 ﻿using System.Net;
 using System.Net.Mail;
-using System.Runtime.InteropServices.Marshalling;
 using Microsoft.Extensions.Logging;
 using Microsoft.Extensions.Options;
 using SkinCa.Business.ServicesContracts;
@@ -12,6 +11,7 @@ namespace SkinCa.Business.Services
     {
         private readonly EmailSecrets network;
         private ILogger<EmailService> _logger;
+
         public EmailService(IOptions<EmailSecrets> options, ILogger<EmailService> logger)
         {
             network = options.Value;
@@ -20,24 +20,25 @@ namespace SkinCa.Business.Services
 
         private async Task SendEmailAsync(string email, string subject, string message)
         {
-            var stmpClient = new SmtpClient("smtp-mail.outlook.com", 587)
-            {
-                EnableSsl = true,
-                UseDefaultCredentials = false,
-                Credentials = new NetworkCredential(network.Email, network.Password),
-            };
-            var senderEmail = network.Email.Trim();
-            MailMessage mail = new MailMessage
-            {
-                From = new MailAddress(senderEmail, "SkinCa Email"),
-                To = { new MailAddress(email) },
-                Subject = subject,
-                IsBodyHtml = true,
-                Body = message
-            };
             
-            await stmpClient.SendMailAsync(mail);
-            
+                var stmpClient = new SmtpClient("smtp-mail.outlook.com", 587)
+                {
+                    EnableSsl = true,
+                    UseDefaultCredentials = false,
+                    Credentials = new NetworkCredential(network.Email, network.Password),
+                };
+                var senderEmail = network.Email.Trim();
+                MailMessage mail = new MailMessage
+                {
+                    From = new MailAddress(senderEmail, "SkinCa Email"),
+                    To = { new MailAddress(email) },
+                    Subject = subject,
+                    IsBodyHtml = true,
+                    Body = message
+                };
+               
+                await stmpClient.SendMailAsync(mail);
+                
         }
 
         public async Task SendConfirmationEmail(string email, string token)

@@ -5,15 +5,22 @@ using Microsoft.AspNetCore.Identity;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.IdentityModel.Tokens;
 using System.Text;
+using System.Text.Json.Serialization;
 using SkinCa.Common.Exceptions;
 using SkinCa.Presentation;
 
 var builder = WebApplication.CreateBuilder(args);
 var configuration = builder.Configuration;
 var builderServices = builder.Services;
-builderServices.AddControllers().ConfigureApiBehaviorOptions(options =>
+
+builderServices.AddControllers().AddJsonOptions(options =>
+    {
+        options.JsonSerializerOptions.DefaultIgnoreCondition = JsonIgnoreCondition.WhenWritingNull;
+    })
+    .ConfigureApiBehaviorOptions(options =>
 {
     options.SuppressModelStateInvalidFilter = true;
+    
 });
 
 builderServices.Configure<JWT>(configuration.GetSection("JWT"));
@@ -50,14 +57,14 @@ builderServices.AddAuthentication(options =>
         ValidateIssuerSigningKey = true,
         ValidIssuer = configuration["JWT:Issuer"],
         ValidAudience = configuration["JWT:Audience"],
-        IssuerSigningKey = new SymmetricSecurityKey(Encoding.UTF8.GetBytes(configuration["JWT:Key"]))
+        IssuerSigningKey = new SymmetricSecurityKey(Encoding.UTF8.GetBytes(configuration["JWT:Key"])),
     };
 });
 
 
 builderServices.RegesterBussinessDI();
 builderServices.RegesterRepositoriesDI();
-builder.Services.AddSingleton<ExceptionMiddleware>();
+builder.Services.AddTransient<ExceptionMiddleware>();
 
 
 builderServices.AddEndpointsApiExplorer();
@@ -65,16 +72,15 @@ builderServices.AddSwaggerGen();
 
 var app = builder.Build();
 
-
 app.UseMiddleware<ExceptionMiddleware>();
 
 app.UseHttpsRedirection();
 
-if (app.Environment.IsDevelopment())
+/*if (app.Environment.IsDevelopment())
 {
     app.UseDeveloperExceptionPage();
-}
-            
+}*/
+
 app.UseSwagger();
 app.UseSwaggerUI();
 

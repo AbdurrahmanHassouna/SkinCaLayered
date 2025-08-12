@@ -1,4 +1,5 @@
-﻿using System.Security.Claims;
+﻿using System.Net.Mail;
+using System.Security.Claims;
 using System.Text.Json;
 using Microsoft.AspNetCore.Http;
 using Microsoft.Extensions.Logging;
@@ -24,6 +25,7 @@ public class ExceptionMiddleware:IMiddleware
         {
             await HandleExceptionAsync(context, ex);
         }
+        
     }
     private static (int statusCode, string userMessage) HandleUnexpectedError(HttpContext context, Exception exception,ILogger<ExceptionMiddleware> _logger)
     {

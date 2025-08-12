@@ -6,5 +6,5 @@ public interface IBookmarkService
 {
     Task<List<BookmarkResponseDto>> GetAllByUserIdAsync(string userId);
     Task CreateAsync(BookmarkRequestDto bookMark);
-    Task  DeleteAsync(int id);
+    Task DeleteAsync(string userId,int bookMarkId);
 }

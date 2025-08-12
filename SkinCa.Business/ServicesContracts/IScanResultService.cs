@@ -1,5 +1,4 @@
 ﻿using SkinCa.Business.DTOs;
-using SkinCa.DataAccess;
 
 namespace SkinCa.Business.ServicesContracts;
 

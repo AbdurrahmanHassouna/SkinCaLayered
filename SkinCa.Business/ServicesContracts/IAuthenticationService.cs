@@ -1,6 +1,5 @@
 ﻿using System.Security.Claims;
 using Microsoft.AspNetCore.Identity;
-using Microsoft.Identity.Client;
 using SkinCa.Business.DTOs;
 using SkinCa.DataAccess;
 

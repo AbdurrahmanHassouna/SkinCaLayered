@@ -17,10 +17,6 @@ public class ScanResultService : IScanResultService
     public async Task<ScanResultResponseDto?> GetByIdAsync(int id)
     {
         var scanResult = await _scanResultRepository.GetByIdAsync(id);
-        if (scanResult == null)
-        {
-            return null;
-        }
 
         return new ScanResultResponseDto
         {

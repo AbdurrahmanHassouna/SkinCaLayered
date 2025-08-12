@@ -1,9 +1,6 @@
-﻿using System.Net.Mime;
-using SkinCa.Business.DTOs;
+﻿using SkinCa.Business.DTOs;
 using SkinCa.Business.ServicesContracts;
 using SkinCa.DataAccess.RepositoriesContracts;
-using Microsoft.EntityFrameworkCore;
-using SkinCa.Common.Exceptions;
 using SkinCa.Common.UtilityExtensions;
 using SkinCa.DataAccess;
 

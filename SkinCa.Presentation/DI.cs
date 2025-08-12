@@ -1,5 +1,4 @@
-﻿using Microsoft.CodeAnalysis.CSharp.Syntax;
-using SkinCa.Business.Services;
+﻿using SkinCa.Business.Services;
 using SkinCa.Business.ServicesContracts;
 using SkinCa.DataAccess.Repositories;
 using SkinCa.DataAccess.RepositoriesContracts;

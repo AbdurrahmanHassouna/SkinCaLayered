@@ -1,7 +1,5 @@
 ﻿using System.ComponentModel.DataAnnotations;
-using Microsoft.AspNetCore.Http;
 using SkinCa.Business.DTOs.WorkingDay;
-using SkinCa.Common;
 
 namespace SkinCa.Business.DTOs.DoctorInfo;
 

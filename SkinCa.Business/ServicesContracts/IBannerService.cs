@@ -1,6 +1,4 @@
-﻿using SkinCa.DataAccess;
-
-using SkinCa.Business.DTOs;
+﻿using SkinCa.Business.DTOs;
 
 namespace SkinCa.Business.ServicesContracts;
 
