@@ -41,6 +41,12 @@ namespace SkinCa.DataAccess.Repositories
                 .ToListAsync();
         }
 
+        public async Task<Chat?> GetChatByUsersIdAsync(string senderId, string receiverId)
+        {
+            return await _context.Chats.Where(c => c.Users.Any(u => u.Id == senderId)
+                                                   && c.Users.Any(u => u.Id == receiverId)).FirstOrDefaultAsync();
+        }
+
         public async Task<Chat> GetByIdAsync(int chatId)
         {
             var chat = await _context.Chats

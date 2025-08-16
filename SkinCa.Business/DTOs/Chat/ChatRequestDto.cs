@@ -1,6 +1,8 @@
-﻿namespace SkinCa.Business.DTOs.Chat;
+﻿using System.ComponentModel.DataAnnotations;
+
+namespace SkinCa.Business.DTOs.Chat;
 
 public class ChatRequestDto
 {
-   public List<string> UserIds { get; set; } = new();
+   public string UserId { get; set; }
 }

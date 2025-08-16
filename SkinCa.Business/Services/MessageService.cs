@@ -24,9 +24,8 @@ namespace SkinCa.Services
             var message = new Message
             {
                 Content = dto.Content,
-                Image = dto.Image,
+                ImageURL = dto.ImageURL,
                 ChatId = dto.ChatId,
-                SenderId = dto.SenderId,
                 Status = MStatus.Sent
                 
             };
@@ -36,21 +35,6 @@ namespace SkinCa.Services
 
             return MapMessageToDto(message);
         }
-
-        public async Task<MessageResponseDto> EditMessageAsync(EditMessageRequestDto dto)
-        {
-            // Retrieve the existing message.
-            var message = await _messageRepository.GetByIdAsync(dto.Id);
-
-            // Update properties.
-            message.Content = dto.Content;
-            message.Image = dto.Image;
-
-            await _messageRepository.EditAsync(message);
-
-            return MapMessageToDto(message);
-        }
-
         public async Task DeleteMessageAsync(int messageId)
         {
             await _messageRepository.DeleteAsync(messageId);
@@ -63,9 +47,8 @@ namespace SkinCa.Services
             {
                 Id = message.Id,
                 Content = message.Content,
-                Image = message.Image,
+                ImageURL = message.ImageURL,
                 ChatId = message.ChatId,
-                SenderId = message.SenderId,
                 Status = message.Status
             };
         }

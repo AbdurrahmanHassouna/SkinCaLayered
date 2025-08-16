@@ -8,6 +8,7 @@ using System.Text;
 using System.Text.Json.Serialization;
 using SkinCa.Common.Exceptions;
 using SkinCa.Presentation;
+using SkinCa.Presentation.Hubs;
 
 var builder = WebApplication.CreateBuilder(args);
 var configuration = builder.Configuration;
@@ -60,7 +61,8 @@ builderServices.AddAuthentication(options =>
         IssuerSigningKey = new SymmetricSecurityKey(Encoding.UTF8.GetBytes(configuration["JWT:Key"])),
     };
 });
-
+//adding signalR
+builder.Services.AddSignalR();
 
 builderServices.RegesterBussinessDI();
 builderServices.RegesterRepositoriesDI();
@@ -76,10 +78,10 @@ app.UseMiddleware<ExceptionMiddleware>();
 
 app.UseHttpsRedirection();
 
-/*if (app.Environment.IsDevelopment())
+if (app.Environment.IsDevelopment())
 {
     app.UseDeveloperExceptionPage();
-}*/
+}
 
 app.UseSwagger();
 app.UseSwaggerUI();
@@ -88,5 +90,5 @@ app.UseAuthentication();
 app.UseAuthorization();
 
 app.MapControllers();
-
+app.MapHub<ChatHub>("/hubs/chat");
 app.Run();

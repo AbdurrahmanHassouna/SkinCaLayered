@@ -24,7 +24,7 @@ namespace SkinCa.DataAccess.Repositories
                 throw new NotFoundException($"Message with ID {message.Id} not found");
 
             existingMessage.Content = message.Content;
-            existingMessage.Image = message.Image;
+            existingMessage.ImageURL = message.ImageURL;
             existingMessage.Status = message.Status;
 
             _context.Messages.Update(existingMessage);

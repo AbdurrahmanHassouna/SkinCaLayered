@@ -6,7 +6,7 @@ namespace SkinCa.DataAccess
     {
         [MaxLength(400)]
         public string? Content { get; set; }
-        public byte[]? Image { get; set; }
+        public string?  ImageURL { get; set; }
         public int ChatId { get; set; }
         public MStatus Status { get; set; }
         public virtual Chat Chat { get; set; }

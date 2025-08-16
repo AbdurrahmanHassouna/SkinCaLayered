@@ -15,7 +15,7 @@ public static class DI
         serviceCollection.AddScoped<IBookmarkService, BookmarkService>();
         serviceCollection.AddScoped<IDiseaseService,DiseaseService>();
         serviceCollection.AddScoped<IDoctorInfoService,DoctorInfoService>();
-        serviceCollection.AddScoped<IEmailService, EmailService>();
+        serviceCollection.AddTransient<IEmailService, EmailService>();
         serviceCollection.AddScoped<IScanResultService, ScanResultService>();
         return serviceCollection;
     }
@@ -28,6 +28,7 @@ public static class DI
         serviceCollection.AddScoped<IScanResultRepository, ScanResultRepository>();
         serviceCollection.AddScoped<IChatRepository, ChatRepository>();
         serviceCollection.AddScoped<IMessageRepository, MessageRepository>();
+        serviceCollection.AddScoped<IApplicationUserRepository, ApplicationUserChatRepository>();
         return serviceCollection;
     }
 }
