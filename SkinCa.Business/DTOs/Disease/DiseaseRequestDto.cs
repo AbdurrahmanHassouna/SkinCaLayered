@@ -10,9 +10,6 @@ namespace SkinCa.Business.DTOs
         [StringLength(100, MinimumLength = 3, ErrorMessage = "Title must be between 3 and 100 characters.")]
         public string Title { get; set; }
 
-        [Required(ErrorMessage = "UserId is required.")]
-        public string UserId { get; set; }
-
         [Required(ErrorMessage = "An image is required.")]
         [Image(["png","jpeg"])]
         public IFormFile Image { get; set; }

@@ -1,4 +1,5 @@
 ﻿using System.Security.Claims;
+using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Identity;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.Extensions.Logging;
@@ -11,27 +12,28 @@ using SkinCa.DataAccess.RepositoriesContracts;
 
 namespace SkinCa.Services
 {
+    [Authorize]
     public class ChatService : IChatService
     {
         private readonly IChatRepository _chatRepository;
         private readonly UserManager<ApplicationUser> _userManager;
         private readonly ILogger<ChatService> _logger;
         private readonly IApplicationUserRepository _userChatRepository;
+
         public ChatService(IChatRepository chatRepository, UserManager<ApplicationUser> userManager,
             ILogger<ChatService> logger,
-             IApplicationUserRepository userChat)
+            IApplicationUserRepository userChat)
         {
             _chatRepository = chatRepository;
             _userManager = userManager;
             _logger = logger;
             _userChatRepository = userChat;
         }
-
-        public async Task<ChatResponseDto> CreateChatAsync(ClaimsPrincipal claimsPrincipal, ChatRequestDto dto)
+        [Authorize(Roles = "User")]
+        public async Task<ChatResponseDto> CreateChatAsync(string userId, ChatRequestDto dto)
         {
-            var sender = await _userManager.GetUserAsync(claimsPrincipal);
-            var receiver = await _userManager.FindByIdAsync(dto.UserId);
-            
+            var sender = await _userManager.FindByIdAsync(userId);
+            var receiver = await _userManager.FindByIdAsync(dto.DoctorId);
             if (sender == null || receiver == null) throw new NotFoundException("User not found");
             var chat = new Chat
             {
@@ -49,39 +51,58 @@ namespace SkinCa.Services
                     }
                 }
             };
-            
+
             await _chatRepository.CreateAsync(chat);
-           
+
             var createdChat = await _chatRepository.GetByIdAsync(chat.Id);
-            
+
             return MapChatToDto(createdChat);
         }
 
-        public async Task DeleteChatAsync(ClaimsPrincipal claimsPrincipal,int chatId)
+        public async Task DeleteChatAsync(string userId, int chatId)
         {
             var chat = await _chatRepository.GetByIdAsync(chatId);
-            var user = await _userManager.GetUserAsync(claimsPrincipal);
-            
-            var applicationUserChat =  chat.ApplicationUserChats.FirstOrDefault(u => u.UserId== user.Id);
-            if (applicationUserChat == null)
+            var user = await _userManager.FindByIdAsync(userId);
+
+            if (chat == null)
             {
-                throw new ServiceException("unauthorized");
+                _logger.LogWarning("DeleteChatAsync: chat {ChatId} not found", chatId);
+                throw new NotFoundException("Chat not found");
             }
-            applicationUserChat.IsDeleted = true;
-            if (chat.ApplicationUserChats.Any(a => a.IsDeleted == false))
+
+            if (user == null)
             {
+                _logger.LogWarning("DeleteChatAsync: user from claims not found");
+                throw new NotFoundException("User not found");
+            }
+
+            var userChat = chat.ApplicationUserChats.FirstOrDefault(u => u.UserId == user.Id);
+            if (userChat == null)
+            {
+                _logger.LogWarning("DeleteChatAsync: user {UserId} is not part of chat {ChatId}", user.Id, chatId);
+                throw new ServiceException("Unauthorized to delete this chat");
+            }
+
+
+            userChat.IsDeleted = true;
+            await _userChatRepository.UpdateAsync(userChat);
+            _logger.LogInformation("DeleteChatAsync: user {UserId} marked chat {ChatId} as deleted", user.Id, chatId);
+
+
+            chat = await _chatRepository.GetByIdAsync(chatId);
+
+            if (chat.ApplicationUserChats.All(a => a.IsDeleted))
+            {
+                _logger.LogInformation("DeleteChatAsync: all participants deleted chat {ChatId}; deleting chat",
+                    chatId);
                 await _chatRepository.DeleteAsync(chatId);
-            }
-            else
-            {
-                await _userChatRepository.UpdateAsync(applicationUserChat);
             }
         }
 
         public async Task<ChatResponseDto> GetChatByIdAsync(int chatId)
         {
             var chat = await _chatRepository.GetByIdAsync(chatId);
-            
+
             return MapChatToDto(chat);
         }
 
@@ -94,6 +115,10 @@ namespace SkinCa.Services
         public async Task<ChatResponseDto> GetChatByUsersIdAsync(string senderId, string receiverId)
         {
             var chat = await _chatRepository.GetChatByUsersIdAsync(senderId, receiverId);
+            if (chat == null)
+            {
+                return await CreateChatAsync(senderId, new ChatRequestDto() { DoctorId = receiverId });
+            }
             return MapChatToDto(chat);
         }
 
@@ -125,9 +150,7 @@ namespace SkinCa.Services
             {
                 Id = message.Id,
                 Content = message.Content,
-                ImageURL = message.ImageURL,
-                ChatId = message.ChatId,
-                Status = message.Status,
+                SenderId = message.SenderId,
             };
         }
     }

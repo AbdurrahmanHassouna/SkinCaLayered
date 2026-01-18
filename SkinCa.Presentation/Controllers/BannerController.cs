@@ -1,4 +1,5 @@
-﻿using Microsoft.AspNetCore.Mvc;
+﻿using Microsoft.AspNetCore.Authorization;
+using Microsoft.AspNetCore.Mvc;
 using SkinCa.Business.DTOs;
 using SkinCa.Business.ServicesContracts;
 
@@ -25,6 +26,7 @@ public class BannerController : ControllerBase
 
     // POST: api/Banner
     [HttpPost]
+    [Authorize(Roles = "Admin")]
     public async Task<IActionResult> CreateBanner([FromForm] BannerRequestDto bannerRequestDto)
     {
         if (!ModelState.IsValid)
@@ -35,6 +37,7 @@ public class BannerController : ControllerBase
 
     // PUT: api/Banner/5
     [HttpPut("{id}")]
+    [Authorize(Roles = "Admin")]
     public async Task<IActionResult> UpdateBanner(int id, [FromForm] BannerRequestDto bannerRequestDto)
     {
         if (!ModelState.IsValid)
@@ -46,6 +49,7 @@ public class BannerController : ControllerBase
 
     // DELETE: api/Banner/5
     [HttpDelete("{id}")]
+    [Authorize(Roles = "Admin")]
     public async Task<IActionResult> DeleteBanner(int id)
     {
         await _bannerService.DeleteAsync(id);

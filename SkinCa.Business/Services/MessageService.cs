@@ -19,15 +19,13 @@ namespace SkinCa.Services
             _logger = logger;
         }
 
-        public async Task<MessageResponseDto> CreateMessageAsync(MessageRequestDto dto)
+        public async Task<MessageResponseDto> CreateMessageAsync(string senderId,MessageRequestDto dto)
         {
             var message = new Message
             {
+                SenderId = senderId,
                 Content = dto.Content,
-                ImageURL = dto.ImageURL,
                 ChatId = dto.ChatId,
-                Status = MStatus.Sent
-                
             };
 
             await _messageRepository.CreateAsync(message);
@@ -47,9 +45,7 @@ namespace SkinCa.Services
             {
                 Id = message.Id,
                 Content = message.Content,
-                ImageURL = message.ImageURL,
-                ChatId = message.ChatId,
-                Status = message.Status
+                SenderId = message.SenderId
             };
         }
     }

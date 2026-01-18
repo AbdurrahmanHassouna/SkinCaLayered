@@ -28,7 +28,6 @@ namespace SkinCa.DataAccess.Repositories
             var chat = await _context.Chats.FindAsync(id);
             if (chat == null)
                 throw new NotFoundException($"Chat was not found.");
-
             _context.Chats.Remove(chat);
             if (await _context.SaveChangesAsync() == 0)
                 throw new RepositoryException("No changes were saved to the database while deleting the chat.");
@@ -37,14 +36,19 @@ namespace SkinCa.DataAccess.Repositories
         public async Task<List<Chat>> GetAllByUserIdAsync(string userId)
         {
             return await _context.Chats
+                .Include(c=>c.Messages)
+                .Include(c=> c.Users)
                 .Where(c => c.Users.Any(u => u.Id == userId))
                 .ToListAsync();
         }
 
         public async Task<Chat?> GetChatByUsersIdAsync(string senderId, string receiverId)
         {
-            return await _context.Chats.Where(c => c.Users.Any(u => u.Id == senderId)
-                                                   && c.Users.Any(u => u.Id == receiverId)).FirstOrDefaultAsync();
+            return await _context.Chats.AsNoTracking()
+                .Include(c=>c.Messages)
+                .Where(c => c.Users.Any(u => u.Id == senderId)
+                       && c.Users.Any(u => u.Id == receiverId))
+                .FirstOrDefaultAsync();
         }
 
         public async Task<Chat> GetByIdAsync(int chatId)

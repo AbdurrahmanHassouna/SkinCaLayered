@@ -2,12 +2,13 @@
 using SkinCa.Business.ServicesContracts;
 using SkinCa.DataAccess.Repositories;
 using SkinCa.DataAccess.RepositoriesContracts;
+using SkinCa.Services;
 
 namespace SkinCa.Presentation;
 
 public static class DI
 {
-    public static IServiceCollection RegesterBussinessDI(this IServiceCollection serviceCollection)
+    public static IServiceCollection RegisterBussinessDI(this IServiceCollection serviceCollection)
     {
         serviceCollection.AddScoped<IUserService, UserService>();
         serviceCollection.AddScoped<IAuthenticationService, AuthenticationService>();
@@ -15,11 +16,13 @@ public static class DI
         serviceCollection.AddScoped<IBookmarkService, BookmarkService>();
         serviceCollection.AddScoped<IDiseaseService,DiseaseService>();
         serviceCollection.AddScoped<IDoctorInfoService,DoctorInfoService>();
+        serviceCollection.AddScoped<IChatService, ChatService>();
+        serviceCollection.AddScoped<IMessageService, MessageService>();
         serviceCollection.AddTransient<IEmailService, EmailService>();
         serviceCollection.AddScoped<IScanResultService, ScanResultService>();
         return serviceCollection;
     }
-    public static IServiceCollection RegesterRepositoriesDI(this IServiceCollection serviceCollection)
+    public static IServiceCollection RegisterRepositoriesDI(this IServiceCollection serviceCollection)
     {
         serviceCollection.AddScoped<IBannerRepository,BannerRepository>();
         serviceCollection.AddScoped<IBookmarkRepository, BookmarkRepository>();

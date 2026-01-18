@@ -1,5 +1,6 @@
 ﻿using SkinCa.Business.DTOs;
 using SkinCa.Business.ServicesContracts;
+using SkinCa.Common.Exceptions;
 using SkinCa.Common.UtilityExtensions;
 using SkinCa.DataAccess;
 using SkinCa.DataAccess.RepositoriesContracts;
@@ -14,7 +15,7 @@ public class DiseaseService : IDiseaseService
     {
         _diseaseRepository = diseaseRepository;
     }
-    public async Task<DiseaseResponseDto?> GetByIdAstbc( int diseaseId)
+    public async Task<DiseaseResponseDto?> GetByIdAsync( int diseaseId)
     {
         var disease = await _diseaseRepository.GetByIdAsync(diseaseId);
         if (disease == null) return null;
@@ -57,7 +58,6 @@ public class DiseaseService : IDiseaseService
         var disease = new Disease
         {
             Title = diseaseRequestDto.Title,
-            UserId = diseaseRequestDto.UserId,
             Specialty = diseaseRequestDto.Specialty,
             Symptoms = diseaseRequestDto.Symptoms,
             Types = diseaseRequestDto.Types,
@@ -65,6 +65,8 @@ public class DiseaseService : IDiseaseService
             DiagnosticMethods = diseaseRequestDto.DiagnosticMethods,
             Prevention = diseaseRequestDto.Prevention
         };
+        if (diseaseRequestDto.Image.Length > 2*1000) throw new ServiceException("large file size");
+        
         disease.Image=await diseaseRequestDto.Image.ToBytesAsync();
         
         await _diseaseRepository.CreateAsync(disease);
@@ -72,18 +74,20 @@ public class DiseaseService : IDiseaseService
 
     public async Task EditAsync(int id,DiseaseRequestDto diseaseRequestDto)
     {
-        var disease = new Disease
+        var disease = await _diseaseRepository.GetByIdAsync(id);
+        if (disease == null)
         {
-            Id = id,
-            Title = diseaseRequestDto.Title,
-            UserId = diseaseRequestDto.UserId,
-            Specialty = diseaseRequestDto.Specialty,
-            Symptoms = diseaseRequestDto.Symptoms,
-            Types = diseaseRequestDto.Types,
-            Causes = diseaseRequestDto.Causes,
-            DiagnosticMethods = diseaseRequestDto.DiagnosticMethods,
-            Prevention = diseaseRequestDto.Prevention
-        };
+            throw new ServiceException("Item not found.");
+        }
+        disease.Title = diseaseRequestDto.Title;
+        disease.Specialty = diseaseRequestDto.Specialty;
+        disease.Symptoms = diseaseRequestDto.Symptoms;
+        disease.Types = diseaseRequestDto.Types;
+        disease.Causes = diseaseRequestDto.Causes;
+        disease.DiagnosticMethods = diseaseRequestDto.DiagnosticMethods;
+        disease.Prevention = diseaseRequestDto.Prevention;
+        if (diseaseRequestDto.Image.Length > 2*1000) throw new ServiceException("large file size");
+        
         disease.Image=await diseaseRequestDto.Image.ToBytesAsync();
         
          await _diseaseRepository.EditAsync(disease);

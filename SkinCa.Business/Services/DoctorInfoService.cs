@@ -35,7 +35,7 @@ public class DoctorInfoService: IDoctorInfoService
             Experience = d.Experience,
             Specialization = d.Specialization,
             Governorate = (Governorate)d.User.Governorate,
-            IsWroking = d.WorkingDays.Any(_doctorInfoRepository.IsWorkingNow)
+            IsWorking = d.WorkingDays.Any(_doctorInfoRepository.IsWorkingNow)
         }).ToList();
     }
 
@@ -90,7 +90,7 @@ public class DoctorInfoService: IDoctorInfoService
             Experience = d.Experience,
             Specialization = d.Specialization,
             Governorate = (Governorate)d.User.Governorate,
-            IsWroking = d.WorkingDays.Any(_doctorInfoRepository.IsWorkingNow)
+            IsWorking = d.WorkingDays.Any(_doctorInfoRepository.IsWorkingNow)
         }).ToList();
     }
 
@@ -115,14 +115,24 @@ public class DoctorInfoService: IDoctorInfoService
             Latitude=model.Latitude,
             Longitude=model.Longitude
         };
+        
         if (model.ProfilePicture != null)
         {
+            if (model.ProfilePicture.Length > 10_000_000) throw new ServiceException("large file size");
             user.ProfilePicture = await model.ProfilePicture.ToBytesAsync();
         }
+            
         var result = await _userManager.CreateAsync(user, model.Password.Trim());
         if (!result.Succeeded)
         {
             return result;
+        }
+        var roleResult = await _userManager.AddToRoleAsync(user, "Doctor");
+        if (!roleResult.Succeeded)
+        {
+            _logger.LogError("Failed to assign role to user: {Errors}", string.Join(", ", roleResult.Errors.Select(e => e.Description)));
+            await _userManager.DeleteAsync(user);
+            return roleResult;
         }
         var doctorInfo = new DoctorInfo()
         {
@@ -173,7 +183,12 @@ public class DoctorInfoService: IDoctorInfoService
         user.Governorate = (short)doctorInfoRequestDto.Governorate;
         user.Latitude = doctorInfoRequestDto.Latitude;
         user.Longitude = doctorInfoRequestDto.Longitude;
-
+        if (doctorInfoRequestDto.ProfilePicture != null)
+        {
+            if (doctorInfoRequestDto.ProfilePicture.Length > 2*1000)
+                throw new ServiceException("large file size");
+            user.ProfilePicture = await doctorInfoRequestDto.ProfilePicture.ToBytesAsync();
+        }
         var result = await _userManager.UpdateAsync(user);
         return result;
     }

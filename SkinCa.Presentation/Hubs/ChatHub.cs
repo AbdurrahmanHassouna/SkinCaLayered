@@ -18,19 +18,21 @@ public class ChatHub:Hub
     
     public override async Task OnConnectedAsync()
     {
+        Console.WriteLine("connected");
         var userId = Context.UserIdentifier;
-        if (string.IsNullOrEmpty(userId))
+        Console.WriteLine($"User {userId} connected with ConnectionId {Context.ConnectionId}");
+        if (!string.IsNullOrEmpty(userId))
         {
             var chats = await _chatService.GetChatsByUserIdAsync(userId);
             foreach (var chat in chats)
             {
                 await Groups.AddToGroupAsync(Context.ConnectionId, $"{chat.Id}");
             }
-        }
+        }   
         await base.OnConnectedAsync();
     }
 
-    public override async Task OnDisconnectedAsync(Exception exception)
+    public override async Task OnDisconnectedAsync(Exception? exception)
     {
         var userId = Context.UserIdentifier;
         if (string.IsNullOrEmpty(userId))
@@ -38,19 +40,26 @@ public class ChatHub:Hub
             var chats = await _chatService.GetChatsByUserIdAsync(userId);
             foreach (var chat in chats)
             {
-                await Groups.AddToGroupAsync(Context.ConnectionId, $"{chat.Id}");
+                await Groups.RemoveFromGroupAsync(Context.ConnectionId, $"{chat.Id}");
             }
         }
     }
     
     public async Task SendMessage(string  receiverId, string message)
     {
+        Console.WriteLine("connected");
         var userId = Context.UserIdentifier;
         if (!string.IsNullOrEmpty(userId))
         {
+
             var chat = await _chatService.GetChatByUsersIdAsync(userId, receiverId);
-            //broadcast to the chat
-            await Clients.Group($"{chat.Id}").SendAsync("ReceiveMessage", message);
+            await _messageService.CreateMessageAsync(userId, new MessageRequestDto()
+            {
+                Content = message,
+                ChatId = chat.Id,
+            });
+
+            await Clients.User($"{receiverId}").SendAsync("ReceiveMessage", message);
         }
     }
 }

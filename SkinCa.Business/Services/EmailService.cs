@@ -1,5 +1,7 @@
 ﻿using System.Net;
 using System.Net.Mail;
+using Microsoft.AspNetCore.Hosting;
+using Microsoft.Extensions.Hosting;
 using Microsoft.Extensions.Logging;
 using Microsoft.Extensions.Options;
 using SkinCa.Business.ServicesContracts;
@@ -9,13 +11,15 @@ namespace SkinCa.Business.Services
 {
     public class EmailService : IEmailService
     {
-        private readonly EmailSecrets network;
+        private readonly EmailSecrets _network;
         private ILogger<EmailService> _logger;
+        private IWebHostEnvironment _env;
         
-        public EmailService(IOptions<EmailSecrets> options, ILogger<EmailService> logger)
+        public EmailService(IOptions<EmailSecrets> options, ILogger<EmailService> logger,IWebHostEnvironment env)
         {
-            network = options.Value;
+            _network = options.Value;
             _logger = logger;
+            _env = env;
         }
         
         private async Task SendEmailAsync(string email, string subject, string message)
@@ -23,9 +27,9 @@ namespace SkinCa.Business.Services
             using var smtpClient = new SmtpClient("smtp.gmail.com", 587);
             smtpClient.EnableSsl = true;
             smtpClient.UseDefaultCredentials = false;
-            smtpClient.Credentials = new NetworkCredential(network.Email.Trim(), network.Password);
+            smtpClient.Credentials = new NetworkCredential(_network.Email.Trim(), _network.Password);
             
-            var senderEmail = network.Email.Trim();
+            var senderEmail = _network.Email.Trim();
             MailMessage mail = new MailMessage
             {
                 From = new MailAddress(senderEmail, "SkinCa"),
@@ -213,8 +217,11 @@ namespace SkinCa.Business.Services
                 tokenValue: token,
                 isPasswordReset: false
             );
-            
-            await SendEmailAsync(email, "Email Confirmation - SkinCa", message);
+            if (_env.IsDevelopment())
+            {
+                Console.WriteLine("Email token : "+token);
+            }
+            else await SendEmailAsync(email, "Email Confirmation - SkinCa", message);
         }
 
         public async Task SendForgotPasswordEmail(string email, string token)
@@ -226,8 +233,11 @@ namespace SkinCa.Business.Services
                 tokenValue: token,
                 isPasswordReset: true
             );
-            
-            await SendEmailAsync(email, "Reset Your Password - SkinCa", message);
+            if (_env.IsDevelopment())
+            {
+                Console.WriteLine("Email token : "+token);
+            }
+            else await SendEmailAsync(email, "Reset Your Password - SkinCa", message);
         }
     }
 }

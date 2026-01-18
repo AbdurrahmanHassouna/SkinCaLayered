@@ -1,4 +1,5 @@
-﻿using Microsoft.AspNetCore.Identity;
+﻿using Microsoft.AspNetCore.Authorization;
+using Microsoft.AspNetCore.Identity;
 using Microsoft.AspNetCore.Mvc;
 using SkinCa.Business.DTOs.DoctorInfo;
 using SkinCa.Business.ServicesContracts;
@@ -7,6 +8,7 @@ namespace SkinCa.Presentation.Controllers
 {
     [Route("api/[controller]")]
     [ApiController]
+    [Authorize]
     public class DoctorController : ControllerBase
     {
         private readonly IDoctorInfoService _doctorInfoService;
@@ -44,6 +46,7 @@ namespace SkinCa.Presentation.Controllers
 
         // POST: api/doctor
         [HttpPost]
+        
         public async Task<ActionResult<IdentityResult>> CreateDoctor([FromForm] DoctorInfoRequestDto doctorInfoDto)
         {
             if (!ModelState.IsValid)
@@ -56,6 +59,7 @@ namespace SkinCa.Presentation.Controllers
 
         // PUT: api/doctor/{id}
         [HttpPut("{id}")]
+        
         public async Task<ActionResult<IdentityResult>> UpdateDoctor(string id, [FromForm] DoctorInfoRequestDto doctorInfoRequestDto)
         {
             if (!ModelState.IsValid)
@@ -68,6 +72,7 @@ namespace SkinCa.Presentation.Controllers
 
         // DELETE: api/doctor/{id}
         [HttpDelete("{id}")]
+        
         public async Task<IActionResult> DeleteDoctor(string id)
         {
             await _doctorInfoService.DeleteDoctorInfoAsync(id);

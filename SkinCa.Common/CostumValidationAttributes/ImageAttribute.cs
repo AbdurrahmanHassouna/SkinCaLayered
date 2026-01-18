@@ -30,6 +30,6 @@ public class ImageAttribute:ValidationAttribute
             }
             else  return ValidationResult.Success;
         }
-        return new ValidationResult("No file");
+        return new ValidationResult("File is required.");
     }
 }

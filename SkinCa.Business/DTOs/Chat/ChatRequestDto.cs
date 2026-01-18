@@ -4,5 +4,5 @@ namespace SkinCa.Business.DTOs.Chat;
 
 public class ChatRequestDto
 {
-   public string UserId { get; set; }
+   public string DoctorId { get; set; }
 }

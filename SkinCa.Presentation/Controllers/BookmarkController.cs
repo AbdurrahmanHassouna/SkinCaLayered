@@ -31,6 +31,7 @@ namespace SkinCa.Presentation.Controllers
 
         // POST: api/bookmark
         [HttpPost]
+        [Authorize(Roles = "Admin")]
         public async Task<IActionResult> CreateBookmark([FromBody] BookmarkRequestDto bookmarkRequestDto)
         {
             if (!ModelState.IsValid)
@@ -44,7 +45,7 @@ namespace SkinCa.Presentation.Controllers
 
         // DELETE: api/bookmark/{id}
         [HttpDelete("{id}")]
-        [Authorize]
+        [Authorize(Roles = "Admin")]
         public async Task<IActionResult> DeleteBookmark(int bookmarkId)
         {
             var userId = User.FindFirstValue(ClaimTypes.NameIdentifier);

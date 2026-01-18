@@ -10,5 +10,5 @@ public class DoctorSummaryDto
     public int Experience {  get; set; }
     public string Specialization { get; set; }
     public Governorate Governorate { get; set; }
-    public bool IsWroking { get; set; }
+    public bool IsWorking { get; set; }
 }

@@ -1,5 +1,6 @@
 ﻿using SkinCa.Business.DTOs;
 using SkinCa.Business.ServicesContracts;
+using SkinCa.Common.Exceptions;
 using SkinCa.DataAccess.RepositoriesContracts;
 using SkinCa.Common.UtilityExtensions;
 using SkinCa.DataAccess;
@@ -37,6 +38,7 @@ public class BannerService : IBannerService
             Title = bannerRequestDto.Title
         };
         
+        if (bannerRequestDto.File.Length > 2*1000) throw new ServiceException("large file size");
         banner.Image = await bannerRequestDto.File.ToBytesAsync();
         await _bannerRepository.UpdateAsync(banner);
     }
@@ -53,7 +55,7 @@ public class BannerService : IBannerService
             Description = bannerRequestDto.Description,
             Title = bannerRequestDto.Title,
         };
-
+        if (bannerRequestDto.File.Length > 2*1000) throw new ServiceException("large file size");
         banner.Image = await bannerRequestDto.File.ToBytesAsync();
 
         await _bannerRepository.AddAsync(banner);

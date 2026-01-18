@@ -2,7 +2,7 @@
 
 namespace SkinCa.Business.DTOs;
 
-public class ScanResultResponseDto
+public class ScanResultDto
 {
     public bool GotCancer { get; set; }
     public byte[] Data { get; set; }

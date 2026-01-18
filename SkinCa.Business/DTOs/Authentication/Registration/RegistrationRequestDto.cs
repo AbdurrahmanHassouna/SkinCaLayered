@@ -7,9 +7,9 @@ namespace SkinCa.Business.DTOs
 {
     public class RegistrationRequestDto
     {
-        [StringLength(50,MinimumLength = 5)]
+        [StringLength(50,MinimumLength = 2)]
         public string FirstName { get; set; }
-        [StringLength(100,MinimumLength = 5)]
+        [StringLength(100,MinimumLength = 2)]
         public string LastName { get; set; }
         [Phone]
         public string PhoneNumber { get; set; }
@@ -28,7 +28,7 @@ namespace SkinCa.Business.DTOs
         [RegularExpression(@"^(?=.*[a-z])(?=.*[A-Z])(?=.*\d)(?=.*[@$!%*?&])[A-Za-z\d@$!%*?&]{8,}$", 
             ErrorMessage = "Password must be at least 8 characters long and include an uppercase letter, lowercase letter, number, and special character.")]
         public string Password { get; set; }
-        [Image([".jpeg",".png",".gif"])]
+        [Image([".jpeg",".png",".gif",".jpg"])]
         public IFormFile? ProfilePicture { get; set; }
     }
 }

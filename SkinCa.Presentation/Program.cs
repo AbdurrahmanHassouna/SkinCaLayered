@@ -18,11 +18,7 @@ builderServices.AddControllers().AddJsonOptions(options =>
     {
         options.JsonSerializerOptions.DefaultIgnoreCondition = JsonIgnoreCondition.WhenWritingNull;
     })
-    .ConfigureApiBehaviorOptions(options =>
-{
-    options.SuppressModelStateInvalidFilter = true;
-    
-});
+    .ConfigureApiBehaviorOptions(options => { options.SuppressModelStateInvalidFilter = true; });
 
 builderServices.Configure<JWT>(configuration.GetSection("JWT"));
 builderServices.Configure<EmailSecrets>(configuration.GetSection("EmailSecrets"));
@@ -30,7 +26,7 @@ builderServices.Configure<EmailSecrets>(configuration.GetSection("EmailSecrets")
 builderServices.AddDbContext<AppDbContext>(options =>
 {
     options.UseSqlServer(configuration.GetConnectionString("SkinCa"));
-}); 
+});
 
 builderServices.AddIdentity<ApplicationUser, IdentityRole>(options =>
     {
@@ -60,20 +56,43 @@ builderServices.AddAuthentication(options =>
         ValidAudience = configuration["JWT:Audience"],
         IssuerSigningKey = new SymmetricSecurityKey(Encoding.UTF8.GetBytes(configuration["JWT:Key"])),
     };
+    o.Events = new JwtBearerEvents
+    {
+        OnMessageReceived = context =>
+        {
+            var accessToken = context.Request.Query["access_token"];
+            var path = context.HttpContext.Request.Path;
+            if (!string.IsNullOrEmpty(accessToken) &&
+                (path.StartsWithSegments("/hubs/chat")))
+            {
+                context.Token = accessToken;
+            }
+            return Task.CompletedTask;
+        }
+    };
 });
-//adding signalR
-builder.Services.AddSignalR();
 
-builderServices.RegesterBussinessDI();
-builderServices.RegesterRepositoriesDI();
-builder.Services.AddTransient<ExceptionMiddleware>();
+builderServices.AddSignalR();
+
+builderServices.RegisterBussinessDI();
+builderServices.RegisterRepositoriesDI();
+builderServices.AddTransient<ExceptionMiddleware>();
 
 
 builderServices.AddEndpointsApiExplorer();
 builderServices.AddSwaggerGen();
 
+builderServices.AddCors(options =>
+{
+    options.AddPolicy("AllowSpecificOrigin",
+        builder => builder
+            .WithOrigins("https://www.postman.com", "https://web.postman.co")
+            .AllowAnyHeader()
+            .AllowAnyMethod()
+            .AllowCredentials());
+});
 var app = builder.Build();
-
+app.UseCors("AllowPostman");
 app.UseMiddleware<ExceptionMiddleware>();
 
 app.UseHttpsRedirection();

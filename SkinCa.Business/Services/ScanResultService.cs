@@ -14,11 +14,11 @@ public class ScanResultService : IScanResultService
         _scanResultRepository = scanResultRepository;
     }
 
-    public async Task<ScanResultResponseDto?> GetByIdAsync(int id)
+    public async Task<ScanResultDto?> GetByIdAsync(int id)
     {
         var scanResult = await _scanResultRepository.GetByIdAsync(id);
 
-        return new ScanResultResponseDto
+        return new ScanResultDto
         {
             GotCancer = scanResult.GotCancer,
             Data = scanResult.Data,
@@ -26,12 +26,12 @@ public class ScanResultService : IScanResultService
         };
     }
 
-    public async Task<List<ScanResultResponseDto>> GetAllByUserIdAsync(int userId)
+    public async Task<List<ScanResultDto>> GetAllByUserIdAsync(string userId)
     {
         var scanResults = await _scanResultRepository.GetAllAsync();
         var userScanResults = scanResults.Where(r => r.UserId == userId.ToString()).ToList();
 
-        return userScanResults.Select(scanResult => new ScanResultResponseDto
+        return userScanResults.Select(scanResult => new ScanResultDto
         {
             GotCancer = scanResult.GotCancer,
             Data = scanResult.Data,
@@ -39,13 +39,13 @@ public class ScanResultService : IScanResultService
         }).ToList();
     }
 
-    public async Task CreateAsync(ScanResultRequestDto scanResultRequestDto)
+    public async Task CreateAsync(ScanResultDto scanResultDto)
     {
         var scanResult = new ScanResult
         {
-            GotCancer = scanResultRequestDto.GotCancer,
-            Data = scanResultRequestDto.Data,
-            Confidence = scanResultRequestDto.Confidence
+            GotCancer = scanResultDto.GotCancer,
+            Data = scanResultDto.Data,
+            Confidence = scanResultDto.Confidence
         };
         await _scanResultRepository.CreateAsync(scanResult);
     }

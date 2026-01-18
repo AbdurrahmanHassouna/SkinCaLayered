@@ -1,41 +1,44 @@
-﻿using Microsoft.AspNetCore.Authorization;
+﻿using System.Security.Claims;
+using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
 using SkinCa.Business.DTOs.Chat;
 using SkinCa.Business.ServicesContracts;
-using SkinCa.Common.Exceptions;
-using System.Security.Claims;
 
-namespace SkinCa.Controllers
+namespace SkinCa.Presentation.Controllers
 {
     [Authorize]
     [Route("api/[controller]")]
     [ApiController]
-    public class ChatsController : ControllerBase
+    public class ChatController : ControllerBase
     {
         private readonly IChatService _chatService;
 
-        public ChatsController(IChatService chatService)
+        public ChatController(IChatService chatService)
         {
             _chatService = chatService;
         }
 
-        // POST: api/chats
-        [HttpPost]
+        // POST: api/chat
+        [HttpPost,Authorize(Roles="User")]
         public async Task<IActionResult> CreateChat([FromBody] ChatRequestDto dto)
         {
-            var chat = await _chatService.CreateChatAsync(User, dto);
+            var userId =  User.FindFirstValue(ClaimTypes.NameIdentifier);
+            if(userId == null) return Unauthorized();
+            var chat = await _chatService.CreateChatAsync(userId, dto);
             return CreatedAtAction(nameof(GetChatById), new { chatId = chat.Id }, chat);
         }
 
-        // DELETE: api/chats/{chatId}
+        // DELETE: api/chat/{chatId}
         [HttpDelete("{chatId}")]
         public async Task<IActionResult> DeleteChat(int chatId)
         {
-            await _chatService.DeleteChatAsync(User, chatId);
+            string? userId = User.FindFirstValue(ClaimTypes.NameIdentifier);
+            if (userId == null) return Unauthorized();
+            await _chatService.DeleteChatAsync(userId, chatId);
             return NoContent();
         }
 
-        // GET: api/chats/{chatId}
+        // GET: api/chat/{chatId}
         [HttpGet("{chatId}")]
         public async Task<IActionResult> GetChatById(int chatId)
         {
@@ -43,11 +46,10 @@ namespace SkinCa.Controllers
             return Ok(chat);
         }
 
-        // GET: api/chats/user
+        // GET: api/chat/user
         [HttpGet("user")]
         public async Task<IActionResult> GetUserChats()
         {
-            // Extract current user ID
             var userId = User.FindFirstValue(ClaimTypes.NameIdentifier);
             if (string.IsNullOrEmpty(userId))
                 return Unauthorized();
@@ -56,7 +58,7 @@ namespace SkinCa.Controllers
             return Ok(chats);
         }
 
-        // GET: api/chats/with/{otherUserId}
+        // GET: api/chat/with/{otherUserId}
         [HttpGet("with/{otherUserId}")]
         public async Task<IActionResult> GetChatByUsers(string otherUserId)
         {
@@ -68,7 +70,7 @@ namespace SkinCa.Controllers
             return Ok(chat);
         }
 
-        // DELETE: api/chats/{chatId}/messages
+        // DELETE: api/chat/{chatId}/messages
         [HttpDelete("{chatId}/messages")]
         public async Task<IActionResult> DeleteChatMessages(int chatId)
         {

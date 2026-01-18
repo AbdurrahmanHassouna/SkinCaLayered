@@ -1,11 +1,9 @@
 ﻿using System.ComponentModel.DataAnnotations;
+using Microsoft.AspNetCore.Http;
 
 namespace SkinCa.Business.DTOs;
 
 public class ScanResultRequestDto
 {
-    public bool GotCancer { get; set; }
-    public byte[] Data { get; set;} 
-    [Range(0,100)]
-    public short Confidence { get; set; }
+    public IFormFile Image { get; set;}
 }

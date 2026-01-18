@@ -4,8 +4,8 @@ namespace SkinCa.Business.ServicesContracts;
 
 public interface IScanResultService
 {
-    Task<ScanResultResponseDto?> GetByIdAsync(int id);
-    Task<List<ScanResultResponseDto>> GetAllByUserIdAsync(int userId);
-    Task CreateAsync(ScanResultRequestDto scanResultRequestDto);
+    Task<ScanResultDto?> GetByIdAsync(int id);
+    Task<List<ScanResultDto>> GetAllByUserIdAsync(string userId);
+    Task CreateAsync(ScanResultDto scanResultDto);
     Task DeleteAsync(int id);
 }

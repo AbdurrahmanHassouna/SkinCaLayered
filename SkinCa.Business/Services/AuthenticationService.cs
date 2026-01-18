@@ -86,7 +86,6 @@ namespace SkinCa.Business.Services
             if (!roleResult.Succeeded)
             {
                 _logger.LogError("Failed to assign role to user: {Errors}", string.Join(", ", roleResult.Errors.Select(e => e.Description)));
-                // Consider cleanup if role assignment fails
                 await _userManager.DeleteAsync(user);
                 return roleResult;
             }

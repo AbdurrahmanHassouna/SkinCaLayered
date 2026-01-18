@@ -5,6 +5,6 @@ namespace SkinCa.Business.ServicesContracts;
 
 public interface IMessageService
 {
-    Task<MessageResponseDto> CreateMessageAsync(MessageRequestDto dto);
+    Task<MessageResponseDto> CreateMessageAsync(string sederId,MessageRequestDto dto);
     Task DeleteMessageAsync(int messageId);
 }

@@ -101,14 +101,14 @@ namespace SkinCa.Presentation.Controllers
             return result.Succeeded ? Ok(result) : BadRequest(result);
         }
 
-        [HttpGet("profile"), Authorize]
+        [HttpGet("profile"), Authorize(Roles = "Admin,User")]
         public async Task<ActionResult<ProfileResponseDto>> Profile()
         {
             var profile = await _userService.GetProfileAsync(User);
             return Ok(profile);
         }
 
-        [HttpPut("update-profile"), Authorize]
+        [HttpPut("update-profile"), Authorize(Roles = "Admin,User")]
         public async Task<ActionResult<IdentityResult>> UpdateProfile([FromForm] ProfileRequestDto model)
         {
             if (!ModelState.IsValid)
@@ -119,7 +119,7 @@ namespace SkinCa.Presentation.Controllers
             return result.Succeeded ? Ok(result) : BadRequest(result);
         }
 
-        [HttpPut("change-password"), Authorize]
+        [HttpPut("change-password"), Authorize(Roles = "Admin,User")]
         public async Task<ActionResult<IdentityResult>> ChangePassword(string oldPassword, string newPassword)
         {
             if (!ModelState.IsValid)
@@ -130,7 +130,7 @@ namespace SkinCa.Presentation.Controllers
             return result.Succeeded ? Ok(result) : BadRequest(result);
         }
 
-        [HttpPut("profile-picture"), Authorize]
+        [HttpPut("profile-picture"), Authorize(Roles = "Admin,User")]
         public async Task<ActionResult<IdentityResult>> UploadProfilePicture(IFormFile file)
         {
             if (!ModelState.IsValid)
@@ -141,7 +141,7 @@ namespace SkinCa.Presentation.Controllers
             return result.Succeeded ? Ok(result) : BadRequest(result);
         }
 
-        [HttpDelete("delete-account"), Authorize]
+        [HttpDelete("delete-account"), Authorize(Roles = "Admin,User")]
         public async Task<ActionResult<IdentityResult>> DeleteAccount()
         {
             var result = await _authService.DeleteAccountAsync(User);

@@ -1,4 +1,5 @@
-﻿using Microsoft.AspNetCore.Mvc;
+﻿using Microsoft.AspNetCore.Authorization;
+using Microsoft.AspNetCore.Mvc;
 using SkinCa.Business.DTOs;
 using SkinCa.Business.ServicesContracts;
 
@@ -35,6 +36,7 @@ namespace SkinCa.Presentation.Controllers
 
         // POST: api/disease
         [HttpPost]
+        [Authorize(Roles = "Admin")]
         public async Task<IActionResult> CreateDisease([FromBody] DiseaseRequestDto diseaseRequestDto)
         {
             if (!ModelState.IsValid)
@@ -47,6 +49,7 @@ namespace SkinCa.Presentation.Controllers
 
         // PUT: api/disease/{id}
         [HttpPut("{id}")]
+        [Authorize(Roles = "Admin")]
         public async Task<IActionResult> EditDisease(int id, [FromBody] DiseaseRequestDto diseaseRequestDto)
         {
             if (!ModelState.IsValid)
@@ -59,6 +62,7 @@ namespace SkinCa.Presentation.Controllers
 
         // DELETE: api/disease/{id}
         [HttpDelete("{id}")]
+        [Authorize(Roles = "Admin")]
         public async Task<IActionResult> DeleteDisease(int id)
         {
             await _diseaseService.DeleteAsync(id);

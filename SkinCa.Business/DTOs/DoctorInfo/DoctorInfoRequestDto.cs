@@ -11,7 +11,7 @@ public class DoctorInfoRequestDto : RegistrationRequestDto
     public decimal ClinicFees { get; set; } 
     [StringLength(1000)]
     public string Description { get; set; }
-    [StringLength(10)]
+    [MaxLength(10)]
     public string[] Services { get; set; }
     [StringLength(100)]
     public string Specialization { get; set; }

@@ -8,10 +8,6 @@ namespace SkinCa.DataAccess
     public class AppDbContext : IdentityDbContext<ApplicationUser>
     {
         private readonly IConfiguration _configuration;
-        public AppDbContext()
-        {
-
-        }
         public AppDbContext(DbContextOptions<AppDbContext> options,IConfiguration config)
             : base(options)
         {
@@ -71,30 +67,31 @@ namespace SkinCa.DataAccess
 
             builder.Entity<ApplicationUser>().Property(x => x.BirthDate).HasColumnType("DATE");
 
-            string roleId = "02174cf0-9412-4cfe-afbf-59f706d72cf6";
-            string userId = "341743f0-asd2-42de-afbf-59kmkkmk72cf6";
-
+            string adminRoleId = "02174cf0-9412-4cfe-afbf-59f706d72cf6";
+            string doctorRoleId = "d7fc4052-eaf9-4b0e-b00a-dabcfe0917e1";
+            string userRoleId = "f7ae0ec7-9746-4389-a8e4-1ce44265c89b";
+            string adminId = "341743f0-asd2-42de-afbf-59kmkkmk72cf6";
             builder.Entity<IdentityRole>().HasData(
                     new IdentityRole
                     {
-                        Id = roleId,
+                        Id = adminRoleId,
                         Name = "Admin",
                         NormalizedName="ADMIN",
-                        ConcurrencyStamp=roleId
+                        ConcurrencyStamp=adminRoleId
                     },
                     new IdentityRole
                     {
-                        Id = "d7fc4052-eaf9-4b0e-b00a-dabcfe0917e1",
+                        Id = doctorRoleId,
                         Name = "Doctor",
                         NormalizedName="DOCTOR",
-                        ConcurrencyStamp="d7fc4052-eaf9-4b0e-b00a-dabcfe0917e1"
+                        ConcurrencyStamp=doctorRoleId
                     },
                     new IdentityRole
                     {
-                        Id = "f7ae0ec7-9746-4389-a8e4-1ce44265c89b",
+                        Id = userRoleId,
                         Name = "User",
                         NormalizedName="USER",
-                        ConcurrencyStamp="f7ae0ec7-9746-4389-a8e4-1ce44265c89b"
+                        ConcurrencyStamp=userRoleId
                     }
                 );
             var image =
@@ -107,7 +104,7 @@ namespace SkinCa.DataAccess
                 NormalizedUserName="SUPER ADMIN",
                 NormalizedEmail=_configuration["SeedData:AdminEmail"]?.ToUpper(),
                 Email=_configuration["SeedData:AdminEmail"],
-                Id=userId,
+                Id=adminId,
                 EmailConfirmed=true,
                 ProfilePicture = Encoding.UTF8.GetBytes(image)
             };
@@ -120,8 +117,8 @@ namespace SkinCa.DataAccess
                 );
             builder.Entity<IdentityUserRole<string>>().HasData(new IdentityUserRole<string>
             {
-                UserId = userId,
-                RoleId = roleId,
+                UserId = adminId,
+                RoleId = adminRoleId,
             });
         }
     }
